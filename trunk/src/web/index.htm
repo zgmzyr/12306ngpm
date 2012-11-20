@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>KO Webmail</title>
+    <script type="text/javascript" src="jquery-1.7.2.js"></script>
+    <script type="text/javascript" src="jquery-ui.min.js"></script>
+    <script type="text/javascript" src="knockout-2.1.0.js"></script>
+    <script src="sammy.js" type="text/javascript"></script>
+    <link href="jquery-ui.css" rel="stylesheet" type="text/css" />
+    <link rel="Stylesheet" href="coderunner.css" />
+    <link rel="Stylesheet" href="webmail.css" />
+</head>
+<body>
+    <!-- Folders -->
+    <ul class="folders" data-bind="foreach: folders">
+        <li data-bind="text: $data.display, 
+                       css: { selected: $data == $root.chosenFolderId() },
+                       click: $root.goToFolder"></li>
+    </ul>
+    
+    <!-- 显示车次查询
+    <div class="viewMail" data-bind="with: queryTrain">
+        <div class="mailInfo">
+            <p>
+               <label>出发地</label>: <input type="text" id="btnStart" name="start" data-bind="value: start" /> &nbsp; 
+               <label>到达地</label>: <input type="text" id="btnTerminal" name="terminal" data-bind="value: terminal" /> &nbsp;
+               <label>出发日期</label>: <input type="text" id="btnDate" name="date" data-bind="value: date" /> &nbsp;
+               <a href="#query-result">查询</a>
+            </p>
+        </div>
+    </div>
+     -->
+    
+    <div class="viewMail" data-bind="with: findTrain">
+        <div class="mailInfo">
+            <p>
+               <label>车次</label>: <input type="text" id="txtNo" name="start" data-bind="value: no" /> &nbsp; 
+               <label>出发日期</label>: <input type="text" id="txtDate" class="date-editor" name="date" data-bind="value: date" /> &nbsp;
+               <a href="#query-result">查询</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Mails grid -->
+    <table class="mails" data-bind="with: trainQueryResult">
+        <thead><tr><th></th><th>车次</th><th>发站</th><th>到站</th><th>发时</th><th>到时</th><th>参考票价</th></tr></thead>
+        <tbody data-bind="foreach: $data">
+            <tr data-bind="click: $root.goToMail">
+                <td><a data-bind="attr: {href: buyTicket(name)}">购买</a></td>
+                <td data-bind="text: name"></td>
+                <td data-bind="text: departure"></td>
+                <td data-bind="text: termination"></td>
+                <td data-bind="text: departureTime"></td>
+                <td data-bind="text: arrivalTime"></td>
+                <td>
+                    <ul data-bind="foreach: Object.keys(prices)">
+                        <li>
+                            <span data-bind="text: $data"></span>：
+                            <span data-bind="text: $parent.prices[$data]"></span>
+                        </li>
+                    </ul>
+                </td>
+            </tr>     
+        </tbody>
+    </table>
+        
+    <div class="viewMail" data-bind="with: buyTicket">
+        <div class="mailInfo">
+            <p>
+               <label>车次</label>: <input type="text" id="btnTrain" name="train" data-bind="value: train" /> &nbsp; 
+               <label>座位号</label>: <input type="text" id="btnTicket" name="ticket" data-bind="value: ticket" /> &nbsp; 
+               <label>身份证号</label>: <input type="text" id="btnId" name="id" data-bind="value: id" /> &nbsp;
+               <label>出发日期</label>: <input type="text" id="btnDate" name="date" data-bind="value: date" /> &nbsp;
+               <a href="#order-result">买票</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="viewMail" data-bind="with: orderStatus">
+        <div class="mailInfo"data-bind="visible: $data" >恭喜你，买到票啦！</div>
+    </div>
+
+    <script type="text/javascript">
+        function queryTrains(condition) {
+            return [{
+                name: 'G101',
+                departure: '北京南',
+                departureTime: '07:00',
+                termination: '上海虹桥',
+                arrivalTime: '12:23',
+                prices: {
+                    '二等软座': '有票',
+                    '一等软座': '3'
+                }
+            }, {
+                name: 'G105',
+                departure: '北京南',
+                departureTime: '07:30',
+                termination: '上海虹桥',
+                arrivalTime: '13:07',
+                prices: {
+                    '二等软座': '有票',
+                    '一等软座': '5'
+                }
+            }, {
+                name: 'D365',
+                departure: '北京南',
+                departureTime: '07:35',
+                termination: '上海虹桥',
+                arrivalTime: '15:42',
+                prices: {
+                    '二等软座': '有票',
+                    '一等软座': '有票',
+                    '软卧上': '有票',
+                    '软卧下': '有票'
+                }
+            }, {
+                name: 'T109',
+                departure: '北京',
+                departureTime: '19:33',
+                termination: '上海',
+                arrivalTime: '10:26',
+                prices: {
+                    '硬座': '有票',
+                    '硬卧上': '有票',
+                    '硬卧中': '有票',
+                    '硬卧下': '无票',
+                    '软卧上': '有票',
+                    '软卧下': '有票',
+                    '高级软卧上': '有票',
+                    '高级软卧下': '5'
+                }
+            }];
+        }
+
+        function buyTicket(train) {
+            return '#buy/' + train + '/' + Math.ceil(Math.random() * 100).toString();
+        }
+
+        function WebmailViewModel() {
+            // Data
+            var self = this;
+            self.folders = [
+                { display: '查询', hash: 'query' },
+                { display: '上一次车次查询结果', hash: 'query-result' },
+                { display: '买票', hash: 'buy' }
+            ];
+            self.chosenFolderId = ko.observable();
+            self.trainQueryResult = ko.observable();
+            self.buyTicket = ko.observable();
+            // self.findTrain = ko.observable({no: ko.observable('G101'), date: ko.observable(new Date())});
+            self.findTrain = ko.observable();
+            self.orderStatus = ko.observable(false);
+
+            // Behaviours    
+            self.goToFolder = function (folder) { location.hash = folder.hash };
+            self.goToMail = function (mail) { location.hash = mail.folder + '/' + mail.id };
+
+            // Client-side routes
+            Sammy(function () {
+                this.get('#query', function () {
+                    self.buyTicket(null);
+                    self.trainQueryResult(null);
+                    self.orderStatus(null);
+
+                    /*
+                    self.queryTrain({
+                    start: '北京',
+                    terminal: '上海',
+                    date: new Date()
+                    });
+                    */
+                    self.findTrain({ no: 'G101', date: '11/19/2012' });
+                });
+
+                this.get('#buy/:train/:ticket', function () {
+                    self.buyTicket({
+                        train: this.params.train,
+                        ticket: this.params.ticket,
+                        id: '',
+                        date: new Date()
+                    });
+
+                    self.trainQueryResult(null);
+                    self.orderStatus(null);
+                    self.findTrain(null);
+                });
+
+                this.get('#query-result', function () {
+                    self.trainQueryResult(queryTrains(self.findTrain()));
+                    self.buyTicket(null);
+                    self.findTrain(null);
+                    self.orderStatus(null);
+                    // $.get("/mail", { folder: this.params.folder }, self.trainQueryResult);
+                });
+
+                this.get('#order-result', function () {
+                    self.buyTicket(null);
+                    self.findTrain(null);
+                    self.trainQueryResult(null);
+                    self.orderStatus(true);
+                });
+
+                this.get('', function () { this.app.runRoute('get', '#query') });
+            }).run();
+        };
+
+        /*
+        ko.bindingHandlers.value = {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                if ($(element).attr('class') == 'date-editor') {
+                    $(element).datepicker();
+                }
+            }
+        };
+        */
+        ko.applyBindings(new WebmailViewModel());
+    </script>
+</body>
+</html>
