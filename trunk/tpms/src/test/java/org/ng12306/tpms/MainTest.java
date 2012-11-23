@@ -37,11 +37,14 @@ public class MainTest extends TestCase {
 
     /**
      * Test to see that the message "Got it!" is sent in the response.
-     */
+	 * TODO: 需要找回myresource这个由maven自带的路径
+	 * 它已经被我删掉了，但后面想想还是应该有这么一个玩意，用以在排错时
+	 * 确保jersey是正常工作的。
     public void _testMyResource() {
         String responseMsg = r.path("myresource").get(String.class);
         assertEquals("Got it!", responseMsg);
     }
+     */
 
     /**
      * Test if a WADL document is available at the relative path

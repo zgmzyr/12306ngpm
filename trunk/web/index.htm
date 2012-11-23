@@ -34,17 +34,16 @@
         <thead><tr><th></th><th>车次</th><th>发站</th><th>到站</th><th>发时</th><th>到时</th><th>参考票价</th></tr></thead>
         <tbody data-bind="foreach: $data">
             <tr data-bind="click: $root.goToMail">
-                <td><a data-bind="attr: {href: buyTicket(name)}">购买</a></td>
+                <td><a data-bind="attr: {href: readyMakeOrder(name)}">购买</a></td>
                 <td data-bind="text: name"></td>
                 <td data-bind="text: departure"></td>
                 <td data-bind="text: termination"></td>
                 <td data-bind="text: departureTime"></td>
                 <td data-bind="text: arrivalTime"></td>
                 <td>
-                    <ul data-bind="foreach: Object.keys(availables)">
+                    <ul data-bind="foreach: availables">
                         <li>
-                            <span data-bind="text: $data"></span>：
-                            <span data-bind="text: $parent.availables[$data]"></span>
+                            <span data-bind="text: $data[Object.keys($data)]"></span>
                         </li>
                     </ul>
                 </td>
@@ -56,12 +55,16 @@
     <div class="viewMail" data-bind="with: buyTicket">
         <div class="mailInfo">
             <p>
-               <label>车次</label>: <input type="text" id="btnTrain" name="train" data-bind="value: train" /> &nbsp; 
-               <label>座位号</label>: <input type="text" id="btnTicket" name="ticket" data-bind="value: ticket" /> &nbsp; 
-               <label>身份证号</label>: <input type="text" id="btnId" name="id" data-bind="value: id" /> &nbsp;
-               <label>出发日期</label>: <input type="text" id="btnDate" name="date" data-bind="value: date" /> &nbsp;
-               <a href="#order-result">买票</a>
+               <label>车次</label>: <input type="text" id="txtTrain" data-bind="value: train" /> &nbsp; 
+               <label>座位号</label>: <input type="text" id="txtTicket" data-bind="value: seat" /> &nbsp; 
+               <br />
+               <label>上车站点</label>: <input type="text" id="txtDeparture" data-bind="value: departure" /> &nbsp; 
+               <label>下车站点</label>: <input type="text" id="txtTermination" data-bind="value: termination" /> &nbsp; 
+               <br />
+               <label>身份证号</label>: <input type="text" id="txtId" data-bind="value: id" /> &nbsp;
+               <label>出发日期</label>: <input type="text" id="txtDate" data-bind="value: date" /> &nbsp;
             </p>
+            <a href="#order-result">买票</a>
         </div>
     </div>
 
@@ -72,59 +75,20 @@
     </div>
 
     <script type="text/javascript">
-        function queryTrains(condition) {
-            return [{
-                name: 'G101',
-                departure: '北京南',
-                departureTime: '07:00',
-                termination: '上海虹桥',
-                arrivalTime: '12:23',
-                availables: {
-                    '二等软座': '有票',
-                    '一等软座': '3'
+        function queryTrains(condition, ret) {
+            // 需要支持跨域访问
+            $.ajax({
+                url: 'http://localhost:12306/ticket/id/' + condition.no + '?jsonpcallback=?',
+                dataType: 'jsonp',
+                jsonp: 'jsonpcallback',
+                crossDomain: true,
+                success: function (data) {
+                    ret(data.train);
                 }
-            }, {
-                name: 'G105',
-                departure: '北京南',
-                departureTime: '07:30',
-                termination: '上海虹桥',
-                arrivalTime: '13:07',
-                availables: {
-                    '二等软座': '有票',
-                    '一等软座': '5'
-                }
-            }, {
-                name: 'D365',
-                departure: '北京南',
-                departureTime: '07:35',
-                termination: '上海虹桥',
-                arrivalTime: '15:42',
-                availables: {
-                    '二等软座': '有票',
-                    '一等软座': '有票',
-                    '软卧上': '有票',
-                    '软卧下': '有票'
-                }
-            }, {
-                name: 'T109',
-                departure: '北京',
-                departureTime: '19:33',
-                termination: '上海',
-                arrivalTime: '10:26',
-                availables: {
-                    '硬座': '有票',
-                    '硬卧上': '有票',
-                    '硬卧中': '有票',
-                    '硬卧下': '无票',
-                    '软卧上': '有票',
-                    '软卧下': '有票',
-                    '高级软卧上': '有票',
-                    '高级软卧下': '5'
-                }
-            }];
+            });
         }
 
-        function buyTicket(train) {
+        function readyMakeOrder(train) {
             return '#buy/' + train + '/' + Math.ceil(Math.random() * 100).toString();
         }
 
@@ -164,9 +128,11 @@
                 this.get('#buy/:train/:ticket', function () {
                     self.buyTicket({
                         train: this.params.train,
-                        ticket: this.params.ticket,
-                        id: '',
-                        date: new Date()
+                        seat: this.params.ticket,
+                        departure: '南京',
+                        termination: '济南',
+                        id: '123456789123456',
+                        date: '11/19/2012'
                     });
 
                     self.trainQueryResult(null);
@@ -176,7 +142,7 @@
 
                 // 显示车次查询结果
                 this.get('#query-result', function () {
-                    self.trainQueryResult(queryTrains(self.findTrain()));
+                    queryTrains(self.findTrain(), self.trainQueryResult);
                     self.buyTicket(null);
                     self.findTrain(null);
                     self.orderStatus(null);
@@ -184,6 +150,20 @@
 
                 // 显示购票结果
                 this.get('#order-result', function () {
+                    var order = self.buyTicket();
+
+                    $.ajax({
+                        url: 'http://localhost:12306/ticket/make?train=' + order.train +
+                                                               '&seat=' + order.seat +
+                                                               '&departure=' + escape(order.departure) +
+                                                               '&termination=' + escape(order.termination) +
+                                                               '&id=' + order.id +
+                                                               '&date=' + escape(order.date) + '&jsonpcallback=?',
+                        dataType: 'jsonp',
+                        jsonp: 'jsonpcallback',
+                        crossDomain: true
+                    });
+
                     self.buyTicket(null);
                     self.findTrain(null);
                     self.trainQueryResult(null);

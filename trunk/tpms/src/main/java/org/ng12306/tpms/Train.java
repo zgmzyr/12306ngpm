@@ -1,6 +1,7 @@
 package org.ng12306.tpms;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlElement;
 
 @XmlRootElement
 public class Train {
@@ -20,5 +21,6 @@ public class Train {
     public String arrivalTime;
 
     // ”‡∆±–≈œ¢
+	@XmlElement
     public String[][] availables;
 }
