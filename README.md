@@ -23,14 +23,24 @@
    
 7. 进入工作主目录 - 这个虚拟机上的主目录是你宿主机执行vagrant命令的目录
    
-   cd /vagrant
+   cd /vagrant/trunk/tpms
 
-   cd server-core/cn12306
-
-   mvn compile test
+   mvn compile exec:java
    
 8. 顺利的话,你应该可以看到BUILD SUCCESS的字样,如有任何问题,欢迎到下面的链接上报BUG:
-   https://github.com/shiyimin/12306/issues
+   http://bugzilla.12306ng.org/
+   
+9. 在宿主机(例如Windows系统上),使用浏览器访问以下地址并能看到一堆json输出的话，恭喜你，环境同步好了：
+   http://localhost:12306/ticket/id/1   
+   
+9. 要访问票池原型的话，请在宿主机上(例如Windows系统上),使用浏览器打开 <12306ngpm根目录>\trunk\web\index.htm。你应该可以试验简单的按车次查询和买票。
+   
+10. 如果需要执行测试用例的话,请执行
+   
+   cd /vagrant/trunk/tpms
+
+   mvn test
+   
 
 English
 =======
