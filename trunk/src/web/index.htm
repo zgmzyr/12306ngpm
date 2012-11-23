@@ -11,26 +11,14 @@
     <link rel="Stylesheet" href="webmail.css" />
 </head>
 <body>
-    <!-- Folders -->
+    <!-- 最上面的菜单导航栏 -->
     <ul class="folders" data-bind="foreach: folders">
         <li data-bind="text: $data.display, 
                        css: { selected: $data == $root.chosenFolderId() },
                        click: $root.goToFolder"></li>
     </ul>
     
-    <!-- 显示车次查询
-    <div class="viewMail" data-bind="with: queryTrain">
-        <div class="mailInfo">
-            <p>
-               <label>出发地</label>: <input type="text" id="btnStart" name="start" data-bind="value: start" /> &nbsp; 
-               <label>到达地</label>: <input type="text" id="btnTerminal" name="terminal" data-bind="value: terminal" /> &nbsp;
-               <label>出发日期</label>: <input type="text" id="btnDate" name="date" data-bind="value: date" /> &nbsp;
-               <a href="#query-result">查询</a>
-            </p>
-        </div>
-    </div>
-     -->
-    
+    <!-- 根据车次和出发日期查询的界面，背后的model是findTrain -->
     <div class="viewMail" data-bind="with: findTrain">
         <div class="mailInfo">
             <p>
@@ -40,8 +28,8 @@
             </p>
         </div>
     </div>
-
-    <!-- Mails grid -->
+    
+    <!-- 显示车次查询结果的列表界面，背后的model是trainQueryResult -->
     <table class="mails" data-bind="with: trainQueryResult">
         <thead><tr><th></th><th>车次</th><th>发站</th><th>到站</th><th>发时</th><th>到时</th><th>参考票价</th></tr></thead>
         <tbody data-bind="foreach: $data">
@@ -53,10 +41,10 @@
                 <td data-bind="text: departureTime"></td>
                 <td data-bind="text: arrivalTime"></td>
                 <td>
-                    <ul data-bind="foreach: Object.keys(prices)">
+                    <ul data-bind="foreach: Object.keys(availables)">
                         <li>
                             <span data-bind="text: $data"></span>：
-                            <span data-bind="text: $parent.prices[$data]"></span>
+                            <span data-bind="text: $parent.availables[$data]"></span>
                         </li>
                     </ul>
                 </td>
@@ -64,6 +52,7 @@
         </tbody>
     </table>
         
+    <!-- 购票界面 -->
     <div class="viewMail" data-bind="with: buyTicket">
         <div class="mailInfo">
             <p>
@@ -76,6 +65,8 @@
         </div>
     </div>
 
+    <!-- 购票成功界面 -->
+    <!-- TODO: 在购票成功界面上添加购到的车次、日期和座位号信息 -->
     <div class="viewMail" data-bind="with: orderStatus">
         <div class="mailInfo"data-bind="visible: $data" >恭喜你，买到票啦！</div>
     </div>
@@ -88,7 +79,7 @@
                 departureTime: '07:00',
                 termination: '上海虹桥',
                 arrivalTime: '12:23',
-                prices: {
+                availables: {
                     '二等软座': '有票',
                     '一等软座': '3'
                 }
@@ -98,7 +89,7 @@
                 departureTime: '07:30',
                 termination: '上海虹桥',
                 arrivalTime: '13:07',
-                prices: {
+                availables: {
                     '二等软座': '有票',
                     '一等软座': '5'
                 }
@@ -108,7 +99,7 @@
                 departureTime: '07:35',
                 termination: '上海虹桥',
                 arrivalTime: '15:42',
-                prices: {
+                availables: {
                     '二等软座': '有票',
                     '一等软座': '有票',
                     '软卧上': '有票',
@@ -120,7 +111,7 @@
                 departureTime: '19:33',
                 termination: '上海',
                 arrivalTime: '10:26',
-                prices: {
+                availables: {
                     '硬座': '有票',
                     '硬卧上': '有票',
                     '硬卧中': '有票',
@@ -140,39 +131,36 @@
         function WebmailViewModel() {
             // Data
             var self = this;
+            // 菜单导航栏背后的数据
             self.folders = [
                 { display: '查询', hash: 'query' },
                 { display: '上一次车次查询结果', hash: 'query-result' },
                 { display: '买票', hash: 'buy' }
             ];
+
+            // 各个视图（view）后面的数据（model）
             self.chosenFolderId = ko.observable();
             self.trainQueryResult = ko.observable();
             self.buyTicket = ko.observable();
-            // self.findTrain = ko.observable({no: ko.observable('G101'), date: ko.observable(new Date())});
             self.findTrain = ko.observable();
             self.orderStatus = ko.observable(false);
 
-            // Behaviours    
+            // 用于控制菜单栏导航的函数，通过修改当前浏览器的hash来切换界面
             self.goToFolder = function (folder) { location.hash = folder.hash };
+            // 触发买票的函数
             self.goToMail = function (mail) { location.hash = mail.folder + '/' + mail.id };
 
-            // Client-side routes
             Sammy(function () {
+                // 显示车次查询界面
                 this.get('#query', function () {
                     self.buyTicket(null);
                     self.trainQueryResult(null);
                     self.orderStatus(null);
 
-                    /*
-                    self.queryTrain({
-                    start: '北京',
-                    terminal: '上海',
-                    date: new Date()
-                    });
-                    */
                     self.findTrain({ no: 'G101', date: '11/19/2012' });
                 });
 
+                // 显示购票界面
                 this.get('#buy/:train/:ticket', function () {
                     self.buyTicket({
                         train: this.params.train,
@@ -186,14 +174,15 @@
                     self.findTrain(null);
                 });
 
+                // 显示车次查询结果
                 this.get('#query-result', function () {
                     self.trainQueryResult(queryTrains(self.findTrain()));
                     self.buyTicket(null);
                     self.findTrain(null);
                     self.orderStatus(null);
-                    // $.get("/mail", { folder: this.params.folder }, self.trainQueryResult);
                 });
 
+                // 显示购票结果
                 this.get('#order-result', function () {
                     self.buyTicket(null);
                     self.findTrain(null);
@@ -201,17 +190,22 @@
                     self.orderStatus(true);
                 });
 
+                // 默认显示根据车次查询的页面
                 this.get('', function () { this.app.runRoute('get', '#query') });
             }).run();
         };
 
         /*
+         * TODO: 加上在日期型文本框上自动附加datepicker的功能
+         * 下面这个回调函数可以正确地在日期型文本框是自动附上jquery datepicker
+         * 但问题是，附上去以后，背后的模型（model）与视图（view）就不能双向绑定了。
+         * 因此我临时将其注释了。
         ko.bindingHandlers.value = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                if ($(element).attr('class') == 'date-editor') {
-                    $(element).datepicker();
-                }
-            }
+        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        if ($(element).attr('class') == 'date-editor') {
+        $(element).datepicker();
+        }
+        }
         };
         */
         ko.applyBindings(new WebmailViewModel());
