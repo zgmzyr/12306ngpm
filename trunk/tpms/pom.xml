@@ -45,6 +45,14 @@
             <artifactId>grizzly-servlet-webserver</artifactId>
             <version>1.9.31</version>
         </dependency>
+	<!-- 
+	     add disruptor support: http://lmax-exchange.github.com/disruptor/
+	-->
+	<dependency>
+	  <groupId>com.googlecode.disruptor</groupId>
+	  <artifactId>disruptor</artifactId>
+	  <version>2.10.3</version>
+	</dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

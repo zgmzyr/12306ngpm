@@ -69,10 +69,6 @@ English
    
    cd /vagrant
 
-   cd server-core/cpp
-
-   make
-
 
 
    
