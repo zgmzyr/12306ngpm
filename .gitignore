@@ -6,3 +6,4 @@
 *~
 *.class
 trunk/tpms/target/*
+*.journal

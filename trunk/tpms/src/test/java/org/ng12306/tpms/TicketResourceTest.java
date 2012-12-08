@@ -9,18 +9,20 @@ import com.sun.jersey.api.client.ClientResponse;
 import java.util.Date;
 
 public class TicketResourceTest {
-    private SelectorThread threadSelector;
+    private static SelectorThread threadSelector;
 
-    private Client c;
+    private static Client c;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         threadSelector = Main.startServer();
+	EventBus.start();
         c = Client.create();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
+	EventBus.shutdown();
         threadSelector.stopEndpoint();
     }
 
@@ -43,17 +45,17 @@ public class TicketResourceTest {
 	Train result = results[0];
 
 	assertEquals("G101", result.name);
-	assertEquals("北京", result.departure);
-	assertEquals("上海", result.termination);
+	assertEquals("北京南", result.departure);
+	assertEquals("上海虹桥", result.termination);
 	
 	// 一个车次的发车时间应该只有时间，没有日期。
-	assertEquals(new Date(0, 0, 0, 8, 0, 0),
+	assertEquals("07:00",
 		     result.departureTime);
-	assertEquals(new Date(0, 0, 0, 15, 0, 0),
+	assertEquals("12:23",
 		     result.arrivalTime);
 
 	// TODO: 这个断言是有问题的,因为我没有车次的具体座位配置.
 	// 等业务网关组的服务出来之后，再来更新这个测试用例
-	assertEquals(4, result.availables.length);
+	assertEquals(2, result.availables.length);
     }
 }
