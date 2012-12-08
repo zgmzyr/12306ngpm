@@ -19,6 +19,13 @@
     </ul>
     
     <!-- 根据车次和出发日期查询的界面，背后的model是findTrain -->
+    <!--
+	model:
+	findTrain: {
+	    no: 'G101',       // 车次号
+	    date: '2012/12/8' // 要查询的日期
+	};
+      -->
     <div class="viewMail" data-bind="with: findTrain">
         <div class="mailInfo">
             <p>
@@ -30,6 +37,23 @@
     </div>
     
     <!-- 显示车次查询结果的列表界面，背后的model是trainQueryResult -->
+    <!--
+	model:
+
+	trainQueryResult: {
+	    name: 'G101',        // 车次号
+	    departure: '北京',   // 始发站
+	    termination: '上海', // 终点站
+	    departureTime: '2012/12/8 08:00', // 发车时间
+	    arrivalTime: '2012/12/8 15:00',   // 到达时间
+	    availables: {
+	        '硬座': '2',
+		'硬卧上': '11',
+		'硬卧中': '无票',
+		'硬卧下': '有票'
+	    }
+	};
+      -->
     <table class="mails" data-bind="with: trainQueryResult">
         <thead><tr><th></th><th>车次</th><th>发站</th><th>到站</th><th>发时</th><th>到时</th><th>参考票价</th></tr></thead>
         <tbody data-bind="foreach: $data">
@@ -52,6 +76,18 @@
     </table>
         
     <!-- 购票界面 -->
+    <!--
+	model
+	
+	buyTicket: {
+	    train: 'G101',           // 车次号
+	    seat: 10,                // 座位号
+	    departure: '北京',        // 上车站点
+	    termination: '南京',      // 下车站点
+	    id: '1234567891203',     // 购票人身份证号
+	    date: '2012/12/9 08:00'  // 上车时间
+	}
+      -->
     <div class="viewMail" data-bind="with: buyTicket">
         <div class="mailInfo">
             <p>

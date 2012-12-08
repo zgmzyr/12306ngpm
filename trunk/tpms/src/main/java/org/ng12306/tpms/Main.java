@@ -11,7 +11,6 @@ import javax.ws.rs.core.UriBuilder;
 
 
 public class Main {
-
     public static final URI BASE_URI = UriBuilder.fromUri("http://localhost/").port(9998).build();
 
     protected static SelectorThread startServer() throws IOException {

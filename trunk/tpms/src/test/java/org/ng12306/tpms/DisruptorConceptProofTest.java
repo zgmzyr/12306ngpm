@@ -8,15 +8,22 @@ import org.junit.*;
 
 public class DisruptorConceptProofTest
 {
+    private final static EventFactory<TestTicketEvent> TestFactory =
+	new EventFactory<TestTicketEvent>() {
+	public TestTicketEvent newInstance() {
+	    return new TestTicketEvent();
+	}
+    };
+
     private long _journalistCount = 0L;
     // 用来验证日志线程看到的最后一个事件值
     private int _lastEventValue = 0;
     // 用来验证日志线程看到了所有生产线程产生的事件
     private int _journalistValueSum = 0;
     // 将事件保存在硬盘里的书记员线程
-    final EventHandler<TicketEvent> _journalist = 
-	new EventHandler<TicketEvent>() {
-	public void onEvent(final TicketEvent event, 
+    final EventHandler<TestTicketEvent> _journalist = 
+	new EventHandler<TestTicketEvent>() {
+	public void onEvent(final TestTicketEvent event, 
 			    final long sequence,
 			    final boolean endOfBatch) throws Exception {
 	    _journalistCount++;
@@ -29,9 +36,9 @@ public class DisruptorConceptProofTest
     // 用来验证备份线程看到了所有生产线程产生的事件
     private int _replicatorValueSum = 0;
     // 将事件发送到备份服务器保存的备份线程
-    final EventHandler<TicketEvent> _replicator = 
-	new EventHandler<TicketEvent>() {
-	public void onEvent(final TicketEvent event,
+    final EventHandler<TestTicketEvent> _replicator = 
+	new EventHandler<TestTicketEvent>() {
+	public void onEvent(final TestTicketEvent event,
 			    final long sequence,
 			    final boolean endOfBatch) throws Exception {
 	    _replicatorCount++;
@@ -39,9 +46,9 @@ public class DisruptorConceptProofTest
 	}
     };
     
-    final EventHandler<TicketEvent> _eventProcessor = 
-	new EventHandler<TicketEvent>() {
-	public void onEvent(final TicketEvent event,
+    final EventHandler<TestTicketEvent> _eventProcessor = 
+	new EventHandler<TestTicketEvent>() {
+	public void onEvent(final TestTicketEvent event,
 			    final long sequence,
 			    final boolean endOfBatch) throws Exception {
 	    System.out.println("[processor] " + new Long(sequence).toString());
@@ -60,10 +67,10 @@ public class DisruptorConceptProofTest
     // 下面这个测试用例和"演示disruptor的基本用法"的作用一致
     @Test
     public void 演示disruptor的dsl用法() throws Exception {
-	Disruptor<TicketEvent> disruptor = 
-	    new Disruptor<TicketEvent>
+	Disruptor<TestTicketEvent> disruptor = 
+	    new Disruptor<TestTicketEvent>
 	    (
-	     TicketPoolService.INSTANCE,
+	     TestFactory,
 	     EXECUTOR,
 	     new SingleThreadedClaimStrategy(RING_SIZE),
 	     new BlockingWaitStrategy()
@@ -73,12 +80,12 @@ public class DisruptorConceptProofTest
 	disruptor.handleEventsWith(_replicator);
 
 	// 启动disruptor,等待publish事件
-	RingBuffer<TicketEvent> ringBuffer = disruptor.start();
+	RingBuffer<TestTicketEvent> ringBuffer = disruptor.start();
 
 	// 添加一些事件
 	for ( int i = 0; i < RING_SIZE; ++i ) {
 	    long sequence = ringBuffer.next();
-	    TicketEvent event = ringBuffer.get(sequence);
+	    TestTicketEvent event = ringBuffer.get(sequence);
 	    event.setValue(i);
 	    ringBuffer.publish(sequence);
 	}
@@ -97,14 +104,16 @@ public class DisruptorConceptProofTest
 	int expected = (0 + RING_SIZE - 1) * RING_SIZE / 2;
 	assertEquals(expected, _journalistValueSum);
 	assertEquals(expected, _replicatorValueSum);
+
+	disruptor.halt();
     }
 	
     @Test
     public void 演示disruptor的基本用法() throws Exception {	
-	RingBuffer<TicketEvent> ringBuffer = 
-	    new RingBuffer<TicketEvent>
+	RingBuffer<TestTicketEvent> ringBuffer = 
+	    new RingBuffer<TestTicketEvent>
 	    (
-	     TicketPoolService.INSTANCE,
+	     TestFactory,
 	     new SingleThreadedClaimStrategy(RING_SIZE),
 	     new BlockingWaitStrategy()
 	    );
@@ -112,16 +121,16 @@ public class DisruptorConceptProofTest
 	SequenceBarrier barrier = ringBuffer.newBarrier();
 
 	// 注册日志线程
-	BatchEventProcessor<TicketEvent> journalist = 
-	    new BatchEventProcessor<TicketEvent>(ringBuffer,
+	BatchEventProcessor<TestTicketEvent> journalist = 
+	    new BatchEventProcessor<TestTicketEvent>(ringBuffer,
 						 barrier, 
 						 _journalist);
 	ringBuffer.setGatingSequences(journalist.getSequence());
 	EXECUTOR.submit(journalist);
 
 	// 注册备份线程
-	BatchEventProcessor<TicketEvent> replicator = 
-	    new BatchEventProcessor<TicketEvent>(ringBuffer,
+	BatchEventProcessor<TestTicketEvent> replicator = 
+	    new BatchEventProcessor<TestTicketEvent>(ringBuffer,
 						 barrier,
 						 _replicator);
 	ringBuffer.setGatingSequences(replicator.getSequence());
@@ -129,7 +138,7 @@ public class DisruptorConceptProofTest
 
 	for ( int i = 0; i < RING_SIZE; ++i ) {
 	    long sequence = ringBuffer.next();
-	    TicketEvent event = ringBuffer.get(sequence);
+	    TestTicketEvent event = ringBuffer.get(sequence);
 	    event.setValue(i);
 	    ringBuffer.publish(sequence);
 	}
