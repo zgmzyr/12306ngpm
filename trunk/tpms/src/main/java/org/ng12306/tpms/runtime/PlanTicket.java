@@ -34,6 +34,33 @@ public class PlanTicket extends Entity {
 		this._orignalId = value;
 	}
 
+	private OperatingSeat _seat;
+
+	public OperatingSeat getSeat() {
+		return this._seat;
+	}
+
+	public void setSeat(OperatingSeat value) {
+		this._seat = value;
+	}
+
+	private SalableRange _salableRange = new SalableRange();
+
+	public SalableRange getSalableRange() {
+		return this._salableRange;
+	}
+
+	private StopRangeGroup _group;
+
+	public StopRangeGroup getGroup() {
+		return this._group;
+	}
+
+	public void setGroup(StopRangeGroup value) {
+		this._group = value;
+	}
+
+	
 	
 
 	

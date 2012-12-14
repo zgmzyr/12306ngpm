@@ -57,14 +57,14 @@ public class TestTicketPoolManager extends ServiceBase
 	}
 	
 	@Override
-	public boolean hasTicket(TicketQueryArgs args) {
+	public boolean hasTicket(TicketQueryArgs args) throws Exception {
 		ITicketPool pool = this.getPool(args);
 		
 		return pool != null ? pool.hasTickets(args) : false;
 	}
 
 	@Override
-	public Ticket[] book(TicketQueryArgs args) {
+	public Ticket[] book(TicketQueryArgs args) throws Exception {
 		ITicketPool pool = this.getPool(args);
 		return pool != null ? pool.book(args) : noTickets;
 	}

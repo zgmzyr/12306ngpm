@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.diting.collections.Queries;
 import org.diting.collections.Selector;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 public class TestRailwayRepository extends ServiceBase 
     implements IRailwayRepository {
@@ -63,8 +63,8 @@ TrainNumber rs = new TrainNumber();
 		rs.setTrainNumber("K600/K597");
 		Route route = new Route();
 		route.setId(UUID.randomUUID());
-		route.setStartDateTime(new DateTime(0L));
-		route.setEndDateTime(new DateTime(Long.MAX_VALUE));
+		route.setStartDate(new LocalDate(0L));
+		route.setEndDate(new LocalDate(Long.MAX_VALUE));
 		rs.getRoutes().add(route);
 	
 		Station[] stations = Arrays.copyOfRange(this._stations, 8, this._stations.length);
@@ -90,8 +90,8 @@ TrainNumber rs = new TrainNumber();
 		rs.setTrainNumber("G101");
 		Route route = new Route();
 		route.setId(UUID.randomUUID());
-		route.setStartDateTime(new DateTime(0L));
-		route.setEndDateTime(new DateTime(Long.MAX_VALUE));
+		route.setStartDate(new LocalDate(0L));
+		route.setEndDate(new LocalDate(Long.MAX_VALUE));
 		rs.getRoutes().add(route);
 	
 		for(int i = 0; i <=7; i ++)

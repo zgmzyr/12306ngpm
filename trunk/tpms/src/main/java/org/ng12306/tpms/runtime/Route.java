@@ -7,24 +7,24 @@ import org.joda.time.*;
 
 public class Route extends Entity {
 
-	private DateTime _startDateTime;
+	private LocalDate _startDate;
 
-	public DateTime getStartDateTime() {
-		return this._startDateTime;
+	public LocalDate getStartDate() {
+		return this._startDate;
 	}
 
-	public void setStartDateTime(DateTime value) {
-		this._startDateTime = value;
+	public void setStartDate(LocalDate value) {
+		this._startDate = value;
 	}
 	
-	private DateTime _endDateTime;
+	private LocalDate _endDate;
 
-	public DateTime getEndDateTime() {
-		return this._endDateTime;
+	public LocalDate getEndDate() {
+		return this._endDate;
 	}
 
-	public void setEndDateTime(DateTime value) {
-		this._endDateTime = value;
+	public void setEndDate(LocalDate value) {
+		this._endDate = value;
 	}
 	
 	

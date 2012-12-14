@@ -34,14 +34,14 @@ public class TicketQueryArgs {
 		this._departureStation = value;
 	}
 
-	private String _DestinationStation;
+	private String _destinationStation;
 
-	public String getname() {
-		return this._DestinationStation;
+	public String getDestinationStation() {
+		return this._destinationStation;
 	}
 
-	public void setname(String value) {
-		this._DestinationStation = value;
+	public void setDestinationStation(String value) {
+		this._destinationStation = value;
 	}
 
 	

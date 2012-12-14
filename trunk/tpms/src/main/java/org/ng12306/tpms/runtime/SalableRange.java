@@ -12,15 +12,17 @@ public class SalableRange {
 		this._departureStart = value;
 	}
 
-	private int _depatureEnd;
+	private int _departureEnd;
 
-	public int getname() {
-		return this._depatureEnd;
+	public int getDepartureEnd() {
+		return this._departureEnd;
 	}
 
-	public void setname(int value) {
-		this._depatureEnd = value;
+	public void setDepartureEnd(int value) {
+		this._departureEnd = value;
 	}
+
+	
 
 	private int _destinationStart;
 
@@ -32,14 +34,22 @@ public class SalableRange {
 		this._destinationStart = value;
 	}
 
-	private int _destinationStop;
+	private int _destinationEnd;
 
-	public int getDestinationStop() {
-		return this._destinationStop;
+	public int getDestinationEnd() {
+		return this._destinationEnd;
 	}
 
-	public void setDestinationStop(int value) {
-		this._destinationStop = value;
+	public void setDestinationEnd(int value) {
+		this._destinationEnd = value;
+	}
+	
+	public void copyFrom(SalableRange other)
+	{
+		this._departureStart = other._departureStart;
+		this._departureEnd = other._departureEnd;
+		this._destinationStart = other._destinationStart;
+		this._destinationEnd = other._destinationEnd;
 	}
 
 	
