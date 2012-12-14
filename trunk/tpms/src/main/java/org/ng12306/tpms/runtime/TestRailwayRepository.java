@@ -60,7 +60,7 @@ public class TestRailwayRepository extends ServiceBase
 TrainNumber rs = new TrainNumber();
 		
 		rs.setId(UUID.randomUUID());
-		rs.setTrainNumber("K600/K597");
+		rs.setName("K600/K597");
 		Route route = new Route();
 		route.setId(UUID.randomUUID());
 		route.setStartDate(new LocalDate(0L));
@@ -87,11 +87,11 @@ TrainNumber rs = new TrainNumber();
 		TrainNumber rs = new TrainNumber();
 		
 		rs.setId(UUID.randomUUID());
-		rs.setTrainNumber("G101");
+		rs.setName("G101");
 		Route route = new Route();
 		route.setId(UUID.randomUUID());
 		route.setStartDate(new LocalDate(0L));
-		route.setEndDate(new LocalDate(Long.MAX_VALUE));
+		route.setEndDate(LocalDate.now().plusYears(10));
 		rs.getRoutes().add(route);
 	
 		for(int i = 0; i <=7; i ++)

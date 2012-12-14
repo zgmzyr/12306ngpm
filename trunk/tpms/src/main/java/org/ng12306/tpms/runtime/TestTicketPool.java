@@ -155,11 +155,18 @@ public class TestTicketPool extends ObjectWithSite
 	public Ticket[] book(TicketQueryArgs args) throws Exception {
 		
 		final TicketPoolQueryArgs args2 = this.toPoolQueryArgs(args);
-		PlanTicket[] planTickets = Queries.query(this.query(args2)).toArray(new PlanTicket[0]);;
+		PlanTicket[] planTickets = Queries.query(this.query(args2)).toArray(new PlanTicket[0]);
+		
+		
 		
 		for(PlanTicket pt : planTickets)
 		{
 			pt.getGroup().getTickets().remove(pt);
+			if(pt.getGroup().getTickets().size() == 0)
+			{
+			    this._stopRangeGroups.remove(pt.getGroup());	
+			}
+			
 			if(args2.getDepartureStop() > pt.getStartStop())
 			{
 				PlanTicket pre = new PlanTicket();
@@ -183,10 +190,28 @@ public class TestTicketPool extends ObjectWithSite
 				after.getSalableRange().copyFrom(pt.getSalableRange());
 				this.addPlanTicketToGroup(after);
 			}
+			
+			
+		}
+		
+		Ticket[] rs = new Ticket[planTickets.length];
+		
+		for(int i = 0; i < planTickets.length; i++)
+		{
+			PlanTicket pt = planTickets[i];
+			rs[i] = new Ticket();
+			rs[i].setId(UUID.randomUUID());
+			rs[i].setTrainNumber(this._train.getTrainNumber().getName());
+			rs[i].setCar(Integer.toString(pt.getSeat().getCar().getCarNumber()));
+			rs[i].setSeatNumber(pt.getSeat().getSeatNumber());
+			rs[i].setDepartureStation(args.getDepartureStation());
+			rs[i].setDestinationStation(args.getDestinationStation());
+			rs[i].setDepartureDate(args.getDate());
+			
 		}
 		
 		
-		return null;
+		return rs;
 	}
 	
 	private void addPlanTicketToGroup(PlanTicket pt)

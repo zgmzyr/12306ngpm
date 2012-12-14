@@ -35,7 +35,7 @@ public class TestTicketPoolManager extends ServiceBase
 		    pool.setSite(this.getSite());
 		    pool.initialize();
 		    
-		    String key = tn.getTrainNumber() + "|" + date.toString(); 
+		    String key = tn.getName() + "|" + date.toString(); 
 
 		    this._pools.put(key,  pool);
 		    

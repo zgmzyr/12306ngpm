@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class TrainNumber extends Entity {
-	private String _trainNumber;
+	private String _name;
 
-	public String getTrainNumber() {
-		return this._trainNumber;
+	public String getName() {
+		return this._name;
 	}
 
-	public void setTrainNumber(String value) {
-		this._trainNumber = value;
+	public void setName(String value) {
+		this._name = value;
 	}
 
 	private Collection<Route> _routes = new ArrayList<Route>();
