@@ -41,35 +41,18 @@ public class TestTicketPoolManager extends ServiceBase
 		    
 		}
 		
-		
-	
-		
 		super.initializeService();
 	};
 	
 	private Hashtable<String, ITicketPool> _pools = new Hashtable<String, ITicketPool>();
 	
 
-	private ITicketPool getPool(TicketQueryArgs args)
+	public ITicketPool getPool(TicketQueryArgs args)
 	{
 	    String key = args.getTrainNumber() + "|" + args.getDate().toString();
 	    return this._pools.get(key);
 	}
 	
-	@Override
-	public boolean hasTicket(TicketQueryArgs args) throws Exception {
-		ITicketPool pool = this.getPool(args);
-		
-		return pool != null ? pool.hasTickets(args) : false;
-	}
-
-	@Override
-	public Ticket[] book(TicketQueryArgs args) throws Exception {
-		ITicketPool pool = this.getPool(args);
-		return pool != null ? pool.book(args) : noTickets;
-	}
-	
-	private static Ticket[] noTickets = new Ticket[]{}; 
 
 	@Override
 	public void addPool(ITicketPool pool) {

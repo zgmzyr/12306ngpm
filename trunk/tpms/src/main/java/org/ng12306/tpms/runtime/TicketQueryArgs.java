@@ -10,7 +10,7 @@ public class TicketQueryArgs {
 		return this._trainNumber;
 	}
 
-	public void setTrainNumberId(String value) {
+	public void setTrainNumber(String value) {
 		this._trainNumber = value;
 	}
 

@@ -57,14 +57,15 @@ public class TestRailwayRepository extends ServiceBase
 
 	
 	private TrainNumber CreateK600K597() {
-TrainNumber rs = new TrainNumber();
+        
 		
+		TrainNumber rs = new TrainNumber();
 		rs.setId(UUID.randomUUID());
 		rs.setName("K600/K597");
 		Route route = new Route();
 		route.setId(UUID.randomUUID());
 		route.setStartDate(new LocalDate(0L));
-		route.setEndDate(new LocalDate(Long.MAX_VALUE));
+		route.setEndDate(LocalDate.now().plusYears(10));
 		rs.getRoutes().add(route);
 	
 		Station[] stations = Arrays.copyOfRange(this._stations, 8, this._stations.length);

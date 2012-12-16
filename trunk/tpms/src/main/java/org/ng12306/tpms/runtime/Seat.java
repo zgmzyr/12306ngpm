@@ -21,6 +21,8 @@ public class Seat extends Entity {
 	public void setType(long value) {
 		this._type = value;
 	}
+	
+	
 
 	
 

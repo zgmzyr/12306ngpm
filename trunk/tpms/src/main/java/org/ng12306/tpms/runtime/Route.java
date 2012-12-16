@@ -1,7 +1,7 @@
 package org.ng12306.tpms.runtime;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
+
 
 import org.joda.time.*;
 
@@ -30,7 +30,7 @@ public class Route extends Entity {
 	
 	private ArrayList<RouteStop> _stops = new ArrayList<RouteStop>();
 	
-	public Collection<RouteStop> getStops()
+	public List<RouteStop> getStops()
 	{
 	    return _stops;
 	}

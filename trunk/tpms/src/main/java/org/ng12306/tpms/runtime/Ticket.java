@@ -43,17 +43,29 @@ public class Ticket extends Entity {
 	public void setCar(String value) {
 		this._car = value;
 	}
+	
 
 	private String _seatNumber;
 
 	public String getSeatNumber() {
 		return this._seatNumber;
 	}
-
+	
+	
 	public void setSeatNumber(String value) {
 		this._seatNumber = value;
 	}
 	
+	private String _seatType;
+
+	public String getSeatType() {
+		return this._seatType;
+	}
+
+	public void setSeatType(String value) {
+		this._seatType = value;
+	}
+
 	private LocalDate _departureDate;
 
 	public LocalDate getDepartureDate() {

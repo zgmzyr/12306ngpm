@@ -1,8 +1,9 @@
 package org.ng12306.tpms.runtime;
 
 public interface ITicketPoolManager {
-	boolean hasTicket(TicketQueryArgs args) throws Exception;
-	Ticket[] book(TicketQueryArgs args) throws Exception;; 
+	
+	
+	ITicketPool getPool(TicketQueryArgs args);
 	
 	void addPool(ITicketPool pool) throws Exception;;
 	

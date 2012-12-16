@@ -14,7 +14,10 @@ public class TicketSeatTypeFilter extends ObjectWithSite
 			@Override
 			public boolean evaluate(PlanTicket ticket) throws Exception {
 				
-				return (ticket.getSeat().getSeatType() & args.getSeatType()) > 0;
+				long t1 = ticket.getSeat().getSeatType();
+				long t2 = args.getSeatType();
+				
+				return (t1 & t2) != 0;
 				
 			}});
 	}
