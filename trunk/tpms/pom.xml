@@ -11,7 +11,7 @@
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-grizzly</artifactId>
             <version>${jersey-version}</version>
-        </dependency>
+        </dependency>            
         <!-- uncomment this to get JSON support:
         -->
          <dependency>
@@ -45,6 +45,14 @@
             <artifactId>grizzly-servlet-webserver</artifactId>
             <version>1.9.31</version>
         </dependency>
+	<!-- 
+	     add disruptor support: http://lmax-exchange.github.com/disruptor/
+	-->
+	<dependency>
+	  <groupId>com.googlecode.disruptor</groupId>
+	  <artifactId>disruptor</artifactId>
+	  <version>2.10.3</version>
+	</dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -56,9 +64,6 @@
             <artifactId>jersey-client</artifactId>
             <version>${jersey-version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<artifactId></artifactId>
         </dependency>
         <dependency>
         	<groupId>joda-time</groupId>

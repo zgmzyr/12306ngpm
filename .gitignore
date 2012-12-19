@@ -5,10 +5,10 @@
 *.db
 *~
 *.class
-/Vagrantfile
+trunk/tpms/target/*
+*.journal
 /trunk/org.diting/target
 .settings
-target
 target
 /trunk/org.diting/target/classes/META-INF/maven/org.diting/org.diting/*.properties
 /trunk/org.diting/target/classes/META-INF/maven/org.diting/org.diting/pom.xml

@@ -1,4 +1,4 @@
-﻿package org.ng12306.tpms.runtime;
+package org.ng12306.tpms.runtime;
 
 public interface IObjectWithSite
 {
