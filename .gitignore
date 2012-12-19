@@ -16,3 +16,5 @@ target
 /trunk/tpms/target/classes/META-INF/maven/org.ng12306.tpms/org.ng12306.tpms/*.properties
 /trunk/tpms/target/classes/META-INF/maven/org.ng12306.tpms/org.ng12306.tpms/pom.xml
 /trunk/tpms/target/classes/META-INF/MANIFEST.MF
+.vpprefdata
+tmp
