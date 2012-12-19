@@ -56,7 +56,7 @@ public class TicketResource {
 	                   @QueryParam("departure") String departure,
 	                   @QueryParam("termination") String termination,
 	                   @QueryParam("id") String id,
-	                   @QueryParam("date") String date) {
+	                   @QueryParam("DateTime") String DateTime) {
 		if ( train == null ) {
 			throw new IllegalArgumentException("车次号不应该为空！");
 		}
@@ -72,7 +72,7 @@ public class TicketResource {
 		if ( id == null ) {
 			throw new IllegalArgumentException("身份证号不应该为空！");
 		}
-		if ( date == null ) {
+		if ( DateTime == null ) {
 			throw new IllegalArgumentException("出发日期不应该为空！");
 		}
 
