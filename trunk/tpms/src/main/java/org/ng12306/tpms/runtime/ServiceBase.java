@@ -1,16 +1,9 @@
-﻿package org.ng12306.tpms.runtime;
+package org.ng12306.tpms.runtime;
 
 import java.util.*;
 
-
 public abstract class ServiceBase implements IService, IObjectWithSite
-{
-
-
-
-	
-
-	
+{	
 	public void initializeService() throws Exception
 	{
 		EventObject e = new EventObject(this);

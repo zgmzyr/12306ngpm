@@ -7,7 +7,6 @@
 *.class
 trunk/tpms/target/*
 *.journal
-/Vagrantfile
 /trunk/org.diting/target
 .settings
 target
