@@ -12,8 +12,15 @@ import org.ng12306.tpms.runtime.*;
 
 public class TestTicketPoolTest {
 
+	/**
+	 * Create G101 ticket pool for "today".
+	 *
+	 */
 	private TestTicketPool createTicketPool() throws Exception {
 
+		
+		
+		
 		ServiceManager.getServices().initializeServices(
 				new Object[] { new TestRailwayRepository()});
 
@@ -44,8 +51,13 @@ public class TestTicketPoolTest {
 
 	}
 
+	/**
+	 * Test book 1 ticket from Beijingnan station to Nanjingnan station with any seat.
+	 * @throws Exception
+	 */
 	@Test
 	public void testBook() throws Exception {
+		//Create query arguments. TicketQueryArgs is used for external client with human readable parameters.
 		TicketQueryArgs query = new TicketQueryArgs();
 		query.setDate(LocalDate.now());
 		query.setDepartureStation("±±¾©ÄÏ");
@@ -54,14 +66,22 @@ public class TestTicketPoolTest {
 		query.setSeatType(-1);
 		query.setCount(1);
 
+		
+		
 		TestTicketPool pool = this.createTicketPool();
 		
+		//Because book is the only operation which may change data, so in the future, toTicketPoolQueryArgs, book and toTicket will
+		//be executed by different disruptor consumers.  
+
+		
+		//Convert query to pool query. pool query is only used inside pool system and holds seat, train as ids or java references.
+				
 		TicketPoolQueryArgs poolQuery = pool.toTicketPoolQueryArgs(query);
 		
 		TicketPoolTicket[] poolTickets = pool.book(poolQuery);
 		
 		
-		
+		//Convert pool ticket to human readable ticket.
 		Ticket[] tickets = pool.toTicket(poolTickets);
 		
 		Assert.assertEquals(1, tickets.length);
@@ -77,6 +97,11 @@ public class TestTicketPoolTest {
 
 	}
 	
+	/**
+	 * This test randomly generates booking request until all tickets are sold out. 
+	 * Finally, it checks every ticket of every seat has been sold and  no range overlapping between tickets on same seat.
+	 * @throws Exception
+	 */
 	@Test
 	public void testSaleAll() throws Exception
 	{

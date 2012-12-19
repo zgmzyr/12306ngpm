@@ -14,6 +14,8 @@ public class TestTicketPoolManagerTest {
 	
 	@Test
 	public void testCreateServices() throws Exception {
+		
+		//Test TestTicketPoolManager can be initialized without throwing any exception.
 		ServiceManager.getServices().initializeServices(new Object[] {new TestRailwayRepository(), new TestTicketPoolManager()});
 		
 		//IRailwayRepository repo = ServiceManager.getServices().getRequiredService(IRailwayRepository.class);
