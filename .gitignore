@@ -5,3 +5,8 @@
 *.db
 *~
 *.class
+/Vagrantfile
+/trunk/org.diting/target
+.settings
+target
+target
