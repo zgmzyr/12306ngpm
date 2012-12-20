@@ -7,11 +7,20 @@ import junit.framework.Assert;
 import org.diting.collections.*;
 
 import org.joda.time.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.ng12306.tpms.runtime.*;
 
 public class TestTicketPoolTest {
 
+	
+	 @BeforeClass
+	 public static void initServices() throws Exception
+	 {
+		 ServiceManager.getServices().initializeServices(
+					new Object[] { new TestRailwayRepository()});
+	 }
+	
 	/**
 	 * Create G101 ticket pool for "today".
 	 *
@@ -20,10 +29,6 @@ public class TestTicketPoolTest {
 
 		
 		
-		
-		ServiceManager.getServices().initializeServices(
-				new Object[] { new TestRailwayRepository()});
-
 		IRailwayRepository repo = ServiceManager.getServices()
 				.getRequiredService(IRailwayRepository.class);
 
@@ -95,6 +100,19 @@ public class TestTicketPoolTest {
 		Assert.assertEquals("G101", ticket.getTrainNumber());
 		
 
+	}
+	
+	/**
+	 * Repeat testSaleAll. Shiyimin reported it has random errors when testSaleAll running. But cannot be reproduced after run 1000 times. 
+	 * @throws Exception
+	 */
+	@Test
+	public void RepeatTestSaleAll() throws Exception
+	{
+		for(int i = 0; i < 1000; i++)
+		{
+			testSaleAll();
+		}
 	}
 	
 	/**
