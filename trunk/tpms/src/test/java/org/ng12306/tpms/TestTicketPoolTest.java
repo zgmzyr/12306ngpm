@@ -102,54 +102,9 @@ public class TestTicketPoolTest {
 
 	}
 	
-	/**
-	 * Repeat testSaleAll. Shiyimin reported it has random errors when testSaleAll running. But cannot be reproduced after run 1000 times. 
-	 * @throws Exception
-	 */
-	@Test
-	public void RepeatTestSaleAll() throws Exception
-	{
-		for(int i = 0; i < 1000; i++)
-		{
-			testSaleAll();
-		}
-	}
 	
-/*	@Test
-	public void TestGrouping() throws Exception
-	{
-		TestTicketPool pool = this.createTicketPool();
-		
-		
 	
-		
-		TicketPoolQueryArgs query = new TicketPoolQueryArgs();
-		
-		query.setCount(1);
-		query.setSeatType(~0);
-		
-		int[][] ranges = new int[][]{
-				new int[]{1, 3},
-				new int[]{4, 5},
-				new int[]{0, 1},
-				new int[]{5, 6},
-				new int[]{6,7},
-				new int[]{0,1},
-				new int[]{2,4},
-				new int[]{1,2},
-				
-		}; 
-		for(int[] range : ranges)
-		{
-			query.setDepartureStop(range[0]);
-			query.setDestinationStop(range[1]);
-			
-			TicketPoolTicket[] tickets = pool.book(query);
-			
-			printTickets(Queries.query(tickets));
-		}
-	}*/
-	
+
 	/**
 	 * This test randomly generates booking request until all tickets are sold out. 
 	 * Finally, it checks every ticket of every seat has been sold and  no range overlapping between tickets on same seat.
