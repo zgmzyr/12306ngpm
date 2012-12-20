@@ -64,6 +64,7 @@ public class TestTicketPool extends ObjectWithSite
 		     
 		     fullRangeGroup.getTickets().add(pt);
 		     pt.setGroup(fullRangeGroup);
+		    
 		}
 	}
 	
