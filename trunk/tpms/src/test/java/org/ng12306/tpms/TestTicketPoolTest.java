@@ -115,6 +115,41 @@ public class TestTicketPoolTest {
 		}
 	}
 	
+/*	@Test
+	public void TestGrouping() throws Exception
+	{
+		TestTicketPool pool = this.createTicketPool();
+		
+		
+	
+		
+		TicketPoolQueryArgs query = new TicketPoolQueryArgs();
+		
+		query.setCount(1);
+		query.setSeatType(~0);
+		
+		int[][] ranges = new int[][]{
+				new int[]{1, 3},
+				new int[]{4, 5},
+				new int[]{0, 1},
+				new int[]{5, 6},
+				new int[]{6,7},
+				new int[]{0,1},
+				new int[]{2,4},
+				new int[]{1,2},
+				
+		}; 
+		for(int[] range : ranges)
+		{
+			query.setDepartureStop(range[0]);
+			query.setDestinationStop(range[1]);
+			
+			TicketPoolTicket[] tickets = pool.book(query);
+			
+			printTickets(Queries.query(tickets));
+		}
+	}*/
+	
 	/**
 	 * This test randomly generates booking request until all tickets are sold out. 
 	 * Finally, it checks every ticket of every seat has been sold and  no range overlapping between tickets on same seat.
@@ -169,18 +204,20 @@ public class TestTicketPoolTest {
 		
 		for(IGrouping<OperatingSeat, TicketPoolTicket> g : groups)
 		{
-			TicketPoolTicket[] tickets = g.toQuery().orderBy(new Selector<TicketPoolTicket, Integer>(){
+			
+			
+			Assert.assertTrue(g.toQuery().count()> 0);
+			
+			int stop = 0;
+			for(TicketPoolTicket t : g.toQuery().orderBy(new Selector<TicketPoolTicket, Integer>(){
 
 				@Override
 				public Integer select(TicketPoolTicket item) {
 					return item.getDepartureStop();
-				}}).toArray(new TicketPoolTicket[0]);
-			
-			Assert.assertTrue(tickets.length > 0);
-			
-			int stop = 0;
-			for(TicketPoolTicket t : tickets)
+				}}))
 			{
+				
+				
 				Assert.assertEquals(stop, t.getDepartureStop());
 				stop = t.getDestinationStop();
 			}
@@ -194,8 +231,6 @@ public class TestTicketPoolTest {
 		
 		
 	}
-	
-
 	
 
 }

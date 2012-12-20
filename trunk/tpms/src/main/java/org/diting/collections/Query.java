@@ -57,7 +57,29 @@ public  class Query<T> implements Iterable<T> {
 		this._source = new ArrayIterable<T>(source);
 	}
 
+	
+	
 
+	private <K,V> Map<K,V> createMap(Comparator<K> comparator)
+	{
+		
+		
+		
+		Map<K,V> rs;
+		if(comparator != null)
+		{
+			rs = new TreeMap<K,V>(comparator);
+		}
+		
+		else
+		{
+			rs = new HashMap<K,V>();
+		}
+		
+		
+		//Map<K,V> rs = comparator != null ? new TreeMap<K,V>(comparator) : new HashMap<K,V>();
+		return rs;
+	}
 
 	private interface IRandomAccessor2<T> 
 	{
@@ -893,6 +915,8 @@ public  class Query<T> implements Iterable<T> {
 		return groupBy(keySelector, null);
 	}
 
+	
+	
 	/**
 	 * Groups the elements of a sequence according to a specified key selector function and compares the keys by using a specified comparer.
 	 * @param keySelector A {@code Selector<T, TResult>} to extract the key for each element.
@@ -901,12 +925,8 @@ public  class Query<T> implements Iterable<T> {
 	 */
 	public <TKey> Query<IGrouping<TKey, T>> groupBy(Selector<T, TKey> keySelector, Comparator<TKey> comparator)
 	{
-		if(comparator == null)
-		{
-			comparator = new NaturalComparator<TKey>();
-		}
-
-		TreeMap<TKey, ListGroup<TKey,T>> rs = new TreeMap<TKey, ListGroup<TKey,T>>(comparator);
+		
+		Map<TKey, ListGroup<TKey,T>> rs =  this.createMap(comparator);
 
 		for(T element : this._source)
 		{
@@ -1648,7 +1668,7 @@ public  class Query<T> implements Iterable<T> {
 	 */
 	public <TInner, TKey, TResult> Query<TResult> join(TInner[] inner, Selector<T, TKey> outerKeySelector, Selector<TInner, TKey> innerKeySelector, Joint<T, TInner, TResult> joint)
 	{
-		return this.join(new ArrayIterable<TInner>(inner), outerKeySelector, innerKeySelector, joint, new NaturalComparator<TKey>());
+		return this.join(new ArrayIterable<TInner>(inner), outerKeySelector, innerKeySelector, joint, null);
 	}
 
 	/**
@@ -1661,7 +1681,7 @@ public  class Query<T> implements Iterable<T> {
 	 */
 	public <TInner, TKey, TResult> Query<TResult> join(Iterable<TInner> inner, Selector<T, TKey> outerKeySelector, Selector<TInner, TKey> innerKeySelector, Joint<T, TInner, TResult> joint)
 	{
-		return this.join(inner, outerKeySelector, innerKeySelector, joint, new NaturalComparator<TKey>());
+		return this.join(inner, outerKeySelector, innerKeySelector, joint, null);
 	}
 
 
@@ -1742,7 +1762,7 @@ public  class Query<T> implements Iterable<T> {
 		private Comparator<TKey> _comparator;
 
 
-		private TreeMap<TKey, IGrouping<TKey, TInner>> _innerGroups;
+		private Map<TKey, IGrouping<TKey, TInner>> _innerGroups;
 		private Iterator<TInner> _currentInner = null;
 		private T _currentOut = null;
 
@@ -1753,7 +1773,7 @@ public  class Query<T> implements Iterable<T> {
 		{
 			if(_state == 0)
 			{
-				this._innerGroups = new TreeMap<TKey, IGrouping<TKey, TInner>>(this._comparator);
+				this._innerGroups = createMap(this._comparator);
 				for(IGrouping<TKey, TInner> group : new Query<TInner>(this._inner).groupBy(this._innerKeySelector, this._comparator))
 				{
 					this._innerGroups.put(group.getKey(), group);
@@ -1882,7 +1902,7 @@ public  class Query<T> implements Iterable<T> {
 	{
 	
 
-		return new Query<IGrouping<TKey, TResult>>(new GroupJoinIterable<TInner, TKey, TResult>(this._source, inner, outerKeySelector, innerKeySelector, joint, new NaturalComparator<TKey>()));
+		return new Query<IGrouping<TKey, TResult>>(new GroupJoinIterable<TInner, TKey, TResult>(this._source, inner, outerKeySelector, innerKeySelector, joint, null));
 	}
 	
 	/**
@@ -1896,7 +1916,7 @@ public  class Query<T> implements Iterable<T> {
 	 */
 	public <TInner, TKey, TResult> Query<IGrouping<TKey, TResult>> groupJoin(TInner[] inner, Selector<T, TKey> outerKeySelector, Selector<TInner, TKey> innerKeySelector, Joint<T, TInner, TResult> joint)
 	{
-		return new Query<IGrouping<TKey, TResult>>(new GroupJoinIterable<TInner, TKey, TResult>(this._source, new ArrayIterable<TInner>(inner), outerKeySelector, innerKeySelector, joint, new NaturalComparator<TKey>()));
+		return new Query<IGrouping<TKey, TResult>>(new GroupJoinIterable<TInner, TKey, TResult>(this._source, new ArrayIterable<TInner>(inner), outerKeySelector, innerKeySelector, joint, null));
 	}
 
 	private class GroupJoinIterable<TInner, TKey, TResult> implements Iterable<IGrouping<TKey, TResult>>
@@ -1945,7 +1965,7 @@ public  class Query<T> implements Iterable<T> {
 		private Comparator<TKey> _comparator;
 
 		private Iterator<IGrouping<TKey, T>> _outGroups;
-		private TreeMap<TKey, IGrouping<TKey, TInner>> _innerGroups;
+		private Map<TKey, IGrouping<TKey, TInner>> _innerGroups;
 		private IGrouping<TKey, TResult> _current = null;
 
 		private int _state = 0;
@@ -1956,7 +1976,7 @@ public  class Query<T> implements Iterable<T> {
 			{
 				this._outGroups = new Query<T>(this._outer).groupBy(this._outerKeySelector, this._comparator).iterator();
 
-				this._innerGroups = new TreeMap<TKey, IGrouping<TKey, TInner>>(this._comparator);
+				this._innerGroups =createMap(this._comparator);
 				for(IGrouping<TKey, TInner> group : new Query<TInner>(this._inner).groupBy(this._innerKeySelector, this._comparator))
 				{
 					this._innerGroups.put(group.getKey(), group);
@@ -2605,7 +2625,7 @@ public  class Query<T> implements Iterable<T> {
 	 */
 	public <TKey> Map<TKey, T> toMap(Selector<T, TKey> selector, Comparator<TKey> comparator) throws Exception
 	{
-		TreeMap<TKey, T> rs = new TreeMap<TKey, T>(comparator);
+		Map<TKey, T> rs = createMap(comparator);
 		for(T item : this._source)
 		{
 			TKey key = selector.select(item);
