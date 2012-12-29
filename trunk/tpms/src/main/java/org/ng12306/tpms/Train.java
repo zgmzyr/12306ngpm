@@ -2,9 +2,10 @@ package org.ng12306.tpms;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
 
 @XmlRootElement
-public class Train {
+public class Train implements Serializable {
     // ³µ´ÎºÅ
     public String name;
 

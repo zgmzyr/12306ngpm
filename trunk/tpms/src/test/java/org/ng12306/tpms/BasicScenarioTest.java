@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 import org.junit.*;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
-import java.util.Date;
+import org.joda.time.DateTime;
 
 public class BasicScenarioTest 
 {
@@ -89,8 +89,8 @@ public class BasicScenarioTest
 	TicketQueryEvent event = _ringBuffer.get(sequence);
 	event.sequence = sequence;
 	event.trainId = "G101";	    
-	event.startDate = new Date(2012, 12, 8, 16, 0, 0);
-	event.endDate = new Date(2012, 12, 9, 0, 0, 0);
+	event.startDate = new DateTime(2012, 12, 8, 16, 0, 0);
+	event.endDate = new DateTime(2012, 12, 9, 0, 0, 0);
 	_ringBuffer.publish(sequence);
 
 	// 2. 然后等待一段时间，以便其他线程可以处理它

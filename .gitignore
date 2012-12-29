@@ -4,12 +4,14 @@
 *.prefs
 *.db
 *~
+*.~*
 *.class
 trunk/tpms/target/*
 *.journal
 /trunk/org.diting/target
 .settings
 target
+research
 /trunk/org.diting/target/classes/META-INF/maven/org.diting/org.diting/*.properties
 /trunk/org.diting/target/classes/META-INF/maven/org.diting/org.diting/pom.xml
 /trunk/org.diting/target/classes/META-INF/MANIFEST.MF
@@ -18,3 +20,4 @@ target
 /trunk/tpms/target/classes/META-INF/MANIFEST.MF
 .vpprefdata
 tmp
+docs/*.png

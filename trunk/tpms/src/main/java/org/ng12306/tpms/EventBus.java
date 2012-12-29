@@ -5,7 +5,7 @@ import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.*;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
-import java.util.Date;
+import org.joda.time.DateTime;
 
 public class EventBus {
     private static ObjectOutputStream _journal;
@@ -76,8 +76,8 @@ public class EventBus {
     // 向消息队列发布一个查询请求事件
     // TODO: 将publicXXXEvent改成异步的，应该返回void类型，异步返回查询结果。
     public static Train[] publishQueryEvent(String trainId,
-					    Date startDate,
-					    Date endDate) {
+					    DateTime startDate,
+					    DateTime endDate) {
 	long sequence = _ringBuffer.next();
 	TicketQueryEvent event = _ringBuffer.get(sequence);
 	event.sequence = sequence;
