@@ -64,6 +64,8 @@ public class TestTicketPool extends ObjectWithSite
 		     
 		     fullRangeGroup.getTickets().add(pt);
 		     pt.setGroup(fullRangeGroup);
+		     
+		    // break;
 		    
 		}
 	}
@@ -215,7 +217,7 @@ public class TestTicketPool extends ObjectWithSite
 			@Override
 			public StopRange select(StopRangeGroup item) {
 				return item.getRange();
-			}});
+			}}, StopRangeComparator.Default);
 		
 		
 		StopRangeGroup group;

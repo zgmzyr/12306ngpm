@@ -56,7 +56,16 @@ public class NaturalComparator<T> implements Comparator<T> {
 		{
 			Integer h1 = arg0.hashCode();
 			Integer h2 = arg1.hashCode();
-			return h1.compareTo(h2);
+			int rs = h1.compareTo(h2);
+			
+			if(rs == 0)
+			{
+				System.out.print("******************Wierd*********************");
+				
+			}
+			
+			return rs;
+			
 		}
 		
 	
