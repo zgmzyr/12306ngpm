@@ -1,6 +1,7 @@
 package org.ng12306.tpms;
 
-import java.util.Date;
+import org.joda.time.DateTime;
+
 import com.sun.jersey.spi.resource.Singleton;
 import com.sun.jersey.api.json.JSONWithPadding;
 import javax.ws.rs.*;
@@ -81,7 +82,7 @@ public class TicketResource {
 
 	public Train[] queryImpl(String trainId) {
 	    return EventBus.publishQueryEvent(trainId,
-					      new Date(),
-					      new Date());
+					      new DateTime(),
+					      new DateTime());
 	}
 }

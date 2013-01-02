@@ -1,6 +1,6 @@
 package org.ng12306.tpms;
 
-import java.util.Date;
+import org.joda.time.DateTime;
 
 //
 // 这代表车票数据库，应该支持增删改查等操作。
@@ -24,8 +24,8 @@ public class TicketRepository {
      * @see Train
      */
     public static Train queryTrain(String name, 
-				   Date startDate, 
-				   Date endDate) {
+				   DateTime startDate, 
+				   DateTime endDate) {
 	for ( int i = 0; i < _trains.length; ++i ) {
 	    Train train = _trains[i];		
 	    if ( train.name.compareTo(name) == 0 ) {
