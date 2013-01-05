@@ -1,9 +1,26 @@
 package org.ng12306.tpms.runtime;
 
+import java.io.Serializable;
+
 import org.joda.time.LocalDate;
 
-public class TicketQueryArgs {
+public class TicketQueryArgs implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7163070002185653449L;
+	
+	private long _sequence;
+
+	public long getSequence() {
+		return this._sequence;
+	}
+
+	public void setSequence(long value) {
+		this._sequence = value;
+	}
+	
 	private String _trainNumber;
 
 	public String getTrainNumber() {
@@ -64,8 +81,31 @@ public class TicketQueryArgs {
 	public void setCount(int value) {
 		this._count = value;
 	}
-
 	
+	
+
+	private TicketQueryAction _action;
+
+	public TicketQueryAction getAction() {
+		return this._action;
+	}
+
+	public void setAction(TicketQueryAction value) {
+		this._action = value;
+	}
+
+	public void copyTo(TicketQueryArgs other)
+	{
+		other._action = this._action;
+		other._count = this._count;
+		other._date = this._date;
+		other._departureStation = this._departureStation;
+		other._destinationStation = this._destinationStation;
+		other._seatType = this._seatType;
+		other._sequence = this._sequence;
+		other._trainNumber = this._trainNumber;
+		
+	}
 	
 	
 }

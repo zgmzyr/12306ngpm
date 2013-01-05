@@ -41,6 +41,9 @@ public class TicketPoolQueryArgs {
 	public void setCount(int value) {
 		this._count = value;
 	}
+	
+	
+	
 
 	
 }

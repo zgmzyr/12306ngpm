@@ -12,5 +12,5 @@ Vagrant::Config.run do |config|
     chef.add_recipe "tomcat"
   end
 
-  config.vm.forward_port 8080, 12306
+  config.vm.forward_port 9998, 12306
 end

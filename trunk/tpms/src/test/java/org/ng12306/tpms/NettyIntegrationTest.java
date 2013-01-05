@@ -22,6 +22,8 @@ import org.joda.time.DateTime;
 import org.junit.*;
 import static org.junit.Assert.*;
 import static org.ng12306.tpms.support.TestConstants.*;
+
+import org.ng12306.tpms.runtime.*;
 import org.ng12306.tpms.support.ObjectBsonEncoder;
 import org.ng12306.tpms.support.ObjectBsonDecoder;
 import org.ng12306.tpms.support.TestNettyServer;
@@ -31,12 +33,9 @@ public class NettyIntegrationTest {
 	  @Override
 	  public void messageReceived(ChannelHandlerContext ctx,
 				      MessageEvent e) {
-	       TicketQueryEvent event = (TicketQueryEvent)e.getMessage();
-	       Train[] trains = EventBus.publishQueryEvent(
-		    event.trainId,
-		    event.startDate,
-		    event.endDate);
-	       e.getChannel().write(trains);
+	       TicketQueryArgs event = (TicketQueryArgs)e.getMessage();
+	       EventBus.publishQueryEvent(event);
+	      
 	  }
      }
 
