@@ -18,10 +18,13 @@ import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import org.junit.*;
 import static org.junit.Assert.*;
 import static org.ng12306.tpms.support.TestConstants.*;
+
+import org.ng12306.tpms.runtime.*;
 import org.ng12306.tpms.support.ObjectBsonEncoder;
 import org.ng12306.tpms.support.ObjectBsonDecoder;
 import org.ng12306.tpms.support.TestNettyServer;
@@ -31,41 +34,23 @@ public class NettyIntegrationTest {
 	  @Override
 	  public void messageReceived(ChannelHandlerContext ctx,
 				      MessageEvent e) {
-	       TicketQueryEvent event = (TicketQueryEvent)e.getMessage();
-	       EventBus.publishQueryEvent(
-		    event.trainId,
-		    event.startDate,
-		    event.endDate,
-		    e.getChannel());
-	       // e.getChannel().write(trains);
+	       TicketQueryArgs event = (TicketQueryArgs)e.getMessage();
+	       event.channel = e.getChannel();
+	       EventBus.publishQueryEvent(event);
 	  }
      }
 
      // 用于在测试用例里向票池服务发送车次查询的Netty处理函数
      class TestQueryTrainHandler extends SimpleChannelUpstreamHandler {
 	  // 要向服务器发送的查询数据包 - 包含车次号
-	  private final TicketQueryEvent _event;
+	  private final TicketQueryArgs _event;
 	  private Train[] _response;
 	  public Train[] getResponse() { return _response; }
 	 
 	  public TestQueryTrainHandler(String trainId) {
-	       _event = new TicketQueryEvent();
-	       _event.trainId = trainId;
-	       _event.startDate = new DateTime();
-	       _event.endDate = _event.startDate.plusDays(1);
-	       
-	       /* 
-	       // 使用Ioc获取一个序列化的接口
-	       ISerializerFactory sf = resolve(ISerializerFactory.class);
-	       // 因为我是使用TDD的方式编程，下面的json的目的仅仅是为了设计一个API而已
-	       // 我觉得流水型API设计可能会更好一些，例如对比下面两行代码与之后注释的代码
-	       ISerializer s = sf.createFrom(event);
-	       _message.writeBytes(s.json().bson().bytes());
-	       
-	       // ISerializer s = resolve(ISerializer.class);
-	       // byte[] bytes = s.toBytes(s.ToBson(event));
-	       // _message.writeBytes(bytes);
-	       */
+	       _event = new TicketQueryArgs();
+	       _event.setTrainNumber(trainId);
+	       _event.setDate(new LocalDate());
 	  }
 	  
 	  @Override

@@ -7,7 +7,11 @@ import org.jboss.netty.channel.Channel;
 // 虽然序列化需要一些计算，但相比io的速度来说，应该是很快了
 // 因此暂时先用Serializable接口来看看
 public class TicketEvent implements Serializable {
-    private TicketEventType _type;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8576176057379004677L;
+	private TicketEventType _type;
     public TicketEventType getType() { return _type; }
 
     public transient Channel channel;

@@ -25,6 +25,8 @@ import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 
+import org.ng12306.tpms.runtime.TicketQueryArgs;
+
 // ITpServer的默认实现，如果要做A/B测试的话，应该是
 // 从TpServer继承实现两种方式
 public class TpServer implements ITpServer {
@@ -96,16 +98,10 @@ public class TpServer implements ITpServer {
 	       // Netty会帮我们将多个零散的数据包整合一个完整的原始的客户端请求数据包
 	       // 另外，由于在其之前我们已经放置了序利化方面的Handler了，所以可以
 	       // 直接通过e.getMessage()获取客户端发送的对象。
-	       TicketQueryEvent event = (TicketQueryEvent)e.getMessage();
+	       TicketQueryArgs event = (TicketQueryArgs)e.getMessage();
 	       // 传递给disruptor车轮队列进行处理。
 	       Channel channel = e.getChannel();
-	       EventBus.publishQueryEvent(
-		    event.trainId,
-		    event.startDate,
-		    event.endDate,
-		    // 直接将客户端的socket端口传递给事件处理程序, 
-		    // 不知道这样对性能有何影响？
-		    channel);       
+	       EventBus.publishQueryEvent(event);       
 	  }
 
 	  // TODO: 需要定义和实现发生异常的日志方式

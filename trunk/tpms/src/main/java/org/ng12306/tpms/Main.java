@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.UriBuilder;
 
+import org.ng12306.tpms.runtime.ServiceManager;
+import org.ng12306.tpms.runtime.TestRailwayRepository;
+import org.ng12306.tpms.runtime.TestTicketPoolManager;
+
 public class Main {
     public static final URI BASE_URI = UriBuilder.fromUri("http://localhost/").port(9998).build();
 
@@ -23,6 +27,10 @@ public class Main {
     }
     
     public static void main(String[] args) throws Exception {
+    	
+    	
+    	ServiceManager.getServices().initializeServices(new Object[] {new TestRailwayRepository(), new TestTicketPoolManager()});
+    	
 	// 启动jersey restful服务
         SelectorThread threadSelector = startServer();
 	// 启动disruptor服务
@@ -36,5 +44,7 @@ public class Main {
 	EventBus.shutdown();
 	// 关闭jersey restful服务
         threadSelector.stopEndpoint();
+        
+        ServiceManager.getServices().uninitializeServices();
     }    
 }

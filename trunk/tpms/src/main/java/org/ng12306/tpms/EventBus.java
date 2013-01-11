@@ -10,48 +10,61 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 
+import org.ng12306.tpms.runtime.ServiceManager;
+import org.ng12306.tpms.runtime.TicketQueryArgs;
+import org.ng12306.tpms.runtime.TicketQueryAction;
+import org.ng12306.tpms.runtime.TicketPoolQueryArgs;
+import org.ng12306.tpms.runtime.ITicketPoolManager;
+import org.ng12306.tpms.runtime.ITicketPool;
+
 public class EventBus {
-    private static ObjectOutputStream _journal;
-    private static RingBuffer<TicketQueryEvent> _ringBuffer;
-    // private static RingBuffer<TicketQueryResultEvent> _outRingBuffer;
-    private static Disruptor<TicketQueryEvent> _disruptor;
-    // private static Disruptor<TicketQueryResultEvent> _disruptorRes;
-    
-    // 日志线程
-    static final EventHandler<TicketQueryEvent> _journalist = 
-	new EventHandler<TicketQueryEvent>() {
-	public void onEvent(final TicketQueryEvent event, 
+     private static ObjectOutputStream _journal;
+     private static RingBuffer<TicketQueryArgs> _ringBuffer;
+     private static Disruptor<TicketQueryArgs> _disruptor;
+     private static ITicketPoolManager _poolManger;
+     
+     // 日志线程
+     static final EventHandler<TicketQueryArgs> _journalist = 
+	  new EventHandler<TicketQueryArgs>() {
+	  public void onEvent(final TicketQueryArgs event, 
+			      final long sequence,
+			      final boolean endOfBatch) throws Exception {
+	       // TODO: 需要确保程序崩溃的时候，所有的数据都在硬盘上
+	       // 因为在硬盘上有一个缓冲区，需要确保即使程序崩溃也能把缓冲里的数据
+	       // 写到硬盘上，不过貌似现代操作系统能够做到在程序崩溃时flush缓存，这点
+	       // 需要测试验证。
+	       _journal.writeObject(event);
+	  }
+     };
+     
+     // 将事件发送到备份服务器保存的备份线程
+     static final EventHandler<TicketQueryArgs> _replicator = new EventHandler<TicketQueryArgs>() {
+	  public void onEvent(final TicketQueryArgs event, final long sequence,
+			      final boolean endOfBatch) throws Exception {
+	       // TODO: 后期再实现备份线程的逻辑
+	  }
+     };
+
+    static final EventHandler<TicketQueryArgs> _eventProcessor = 
+	new EventHandler<TicketQueryArgs>() {
+	public void onEvent(final TicketQueryArgs event,
 			    final long sequence,
 			    final boolean endOfBatch) throws Exception {
-	    // TODO: 需要确保程序崩溃的时候，所有的数据都在硬盘上
-	    // 因为在硬盘上有一个缓冲区，需要确保即使程序崩溃也能把缓冲里的数据
-	    // 写到硬盘上，不过貌似现代操作系统能够做到在程序崩溃时flush缓存，这点
-	    // 需要测试验证。
-	    _journal.writeObject(event);
-	}
-    };
+	     // 根据车次号查询车次详细信息	       
+	     ITicketPool pool = EventBus._poolManger.getPool(event);
+	     
+	     // TODO: 这段代码尚有争议，因为查询车票应该返回有票的车次列表。
+	     if (pool != null) {
+		  TicketPoolQueryArgs poolArgs = pool
+		       .toTicketPoolQueryArgs(event);
+		  if (event.getAction() == TicketQueryAction.Query) {
+		       boolean result = pool.hasTickets(poolArgs);
+		       // result 直接丢弃result了。
+		  }
+	     }
 
-    // 将事件发送到备份服务器保存的备份线程
-    static final EventHandler<TicketQueryEvent> _replicator = 
-	new EventHandler<TicketQueryEvent>() {
-	public void onEvent(final TicketQueryEvent event,
-			    final long sequence,
-			    final boolean endOfBatch) throws Exception {
-	    // TODO: 后期再实现备份线程的逻辑
-	}
-    };
-
-    static final EventHandler<TicketQueryEvent> _eventProcessor = 
-	new EventHandler<TicketQueryEvent>() {
-	public void onEvent(final TicketQueryEvent event,
-			    final long sequence,
-			    final boolean endOfBatch) throws Exception {
-	    // 根据车次号查询车次详细信息
-	    Train train = TicketRepository.queryTrain(event.trainId,
-						      event.startDate,
-						      event.endDate);
-
-	    // 不管找到与否，都会有一个响应
+	     /*
+	     // 不管找到与否，都会有一个响应
 	    Train[] trains = null;
 	    if ( train != null ) {
 		trains = new Train[] { train };
@@ -65,24 +78,7 @@ public class EventBus {
 	    // 再重发响应？
 	    ChannelFuture future = event.channel.write(trains);	    
 	    future.addListener(ChannelFutureListener.CLOSE);
-
-	    /*
-	    long s = _outRingBuffer.next();
-	    TicketQueryResultEvent e = _outRingBuffer.get(s);	    
-	    // 将响应消息和请求消息关联起来，因为调用者也有可能是异步处理的
-	    e.sequence = event.sequence;
-
-	    // 找到了的话，就向响应消息队列里放入一个车次详细信息数组
-	    if ( train != null ) {	       
-		e.trains = new Train[1];
-		e.trains[0] = train;
-	    } else {
-		// 不能设置为null，否则前台jersey等restful服务
-		// 在序列化结果的时候可能会出错，因此宁愿返回一个空数组。
-		e.trains = new Train[0];
-	    }
-	    _outRingBuffer.publish(s);
-	    */
+	     */
 	}
     };
     
@@ -93,29 +89,24 @@ public class EventBus {
 
     // 向消息队列发布一个查询请求事件
     // TODO: 将publicXXXEvent改成异步的，应该返回void类型，异步返回查询结果。
-    public static void publishQueryEvent(String trainId,
-					 DateTime startDate,
-					 DateTime endDate,
-					 Channel channel) {
+    public static void publishQueryEvent(TicketQueryArgs args) {
 	long sequence = _ringBuffer.next();
-	TicketQueryEvent event = _ringBuffer.get(sequence);
-	event.sequence = sequence;
-	event.trainId = trainId;
-	event.startDate = startDate;
-	event.endDate = endDate;
-	event.channel = channel;
+	TicketQueryArgs event = _ringBuffer.get(sequence);
+	args.copyTo(event);
+	// event.sequence = sequence;
+	event.setSequence(sequence);
+
+	// 将消息放到车轮队列里，以便处理
 	_ringBuffer.publish(sequence);
-	
-	// 代码应该到此为止，不过我还不知道如何修改jersey，使其
-	// 返回异步向来源restful服务调用者返回结果，因此只好
-	// 用下面同步的方式
-	// return waitForResponse(sequence).trains;
     }
 
     public static void start() throws Exception {
-	// 在disruptor启动之前打开日志
-	openJournal();
-	startDisruptor();
+	 _poolManger = ServiceManager.getServices().getRequiredService(
+	      ITicketPoolManager.class);
+
+	 // 在disruptor启动之前打开日志
+	 openJournal();
+	 startDisruptor();
     }
     
     public static void shutdown() throws Exception {
@@ -136,7 +127,7 @@ public class EventBus {
     private static void startDisruptor() {       
 	// 创建处理查询消息的disruptor
 	_disruptor = 
-	    new Disruptor<TicketQueryEvent>
+	    new Disruptor<TicketQueryArgs>
 	    (
 	     TicketPoolService.QueryFactory,
 	     EXECUTOR,
@@ -154,32 +145,5 @@ public class EventBus {
 
 	// 启动disruptor,等待publish事件
 	_disruptor.start();
-
-	/*
-	// 创建返回查询结果消息的disruptor
-	_disruptorRes = 
-	    new Disruptor<TicketQueryResultEvent>
-	    (
-	     TicketPoolService.QueryResultFactory,
-	     EXECUTOR,
-	     new SingleThreadedClaimStrategy(RING_SIZE),
-	     new BlockingWaitStrategy()
-	    );
-	// 在返回结果消息的时候，就不做任何日志和备份了。
-	_outRingBuffer = _disruptorRes.start();
-	*/
     }
-
-    /*
-    // 等知道如何整合jersey异步调用后，删掉这个函数
-    private static TicketQueryResultEvent waitForResponse(long sequence) {
-	while ( true ) {
-	    long s = _outRingBuffer.getCursor();
-	    TicketQueryResultEvent event = _outRingBuffer.get(s);
-	    if ( event.sequence == sequence ) {
-		return event;
-	    }
-	}
-    }
-    */
 }
