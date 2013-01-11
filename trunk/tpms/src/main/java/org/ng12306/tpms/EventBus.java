@@ -6,13 +6,16 @@ import com.lmax.disruptor.dsl.*;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 import org.joda.time.DateTime;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 
 public class EventBus {
     private static ObjectOutputStream _journal;
     private static RingBuffer<TicketQueryEvent> _ringBuffer;
-    private static RingBuffer<TicketQueryResultEvent> _outRingBuffer;
+    // private static RingBuffer<TicketQueryResultEvent> _outRingBuffer;
     private static Disruptor<TicketQueryEvent> _disruptor;
-    private static Disruptor<TicketQueryResultEvent> _disruptorRes;
+    // private static Disruptor<TicketQueryResultEvent> _disruptorRes;
     
     // 日志线程
     static final EventHandler<TicketQueryEvent> _journalist = 
@@ -49,6 +52,21 @@ public class EventBus {
 						      event.endDate);
 
 	    // 不管找到与否，都会有一个响应
+	    Train[] trains = null;
+	    if ( train != null ) {
+		trains = new Train[] { train };
+	    } else { 
+		trains = new Train[0];
+	    }
+
+	    // 将查询结果直接写到附在事件上的客户端端口上。
+	    // 请求处理的结果不备份，因为没有必要，如果客户端收不到反馈，
+	    // 它需要再发一次，否则的话，难道票池在恢复时还要遍历备份
+	    // 再重发响应？
+	    ChannelFuture future = event.channel.write(trains);	    
+	    future.addListener(ChannelFutureListener.CLOSE);
+
+	    /*
 	    long s = _outRingBuffer.next();
 	    TicketQueryResultEvent e = _outRingBuffer.get(s);	    
 	    // 将响应消息和请求消息关联起来，因为调用者也有可能是异步处理的
@@ -63,8 +81,8 @@ public class EventBus {
 		// 在序列化结果的时候可能会出错，因此宁愿返回一个空数组。
 		e.trains = new Train[0];
 	    }
-
 	    _outRingBuffer.publish(s);
+	    */
 	}
     };
     
@@ -75,21 +93,23 @@ public class EventBus {
 
     // 向消息队列发布一个查询请求事件
     // TODO: 将publicXXXEvent改成异步的，应该返回void类型，异步返回查询结果。
-    public static Train[] publishQueryEvent(String trainId,
-					    DateTime startDate,
-					    DateTime endDate) {
+    public static void publishQueryEvent(String trainId,
+					 DateTime startDate,
+					 DateTime endDate,
+					 Channel channel) {
 	long sequence = _ringBuffer.next();
 	TicketQueryEvent event = _ringBuffer.get(sequence);
 	event.sequence = sequence;
 	event.trainId = trainId;
 	event.startDate = startDate;
 	event.endDate = endDate;
+	event.channel = channel;
 	_ringBuffer.publish(sequence);
-
+	
 	// 代码应该到此为止，不过我还不知道如何修改jersey，使其
 	// 返回异步向来源restful服务调用者返回结果，因此只好
 	// 用下面同步的方式
-	return waitForResponse(sequence).trains;
+	// return waitForResponse(sequence).trains;
     }
 
     public static void start() throws Exception {
@@ -102,7 +122,7 @@ public class EventBus {
 	// 先关闭掉disruptor，再关闭日志文件
 	// 以免出现日志线程和disruptor关闭同时运行的情况
 	_disruptor.shutdown();
-	_disruptorRes.shutdown();
+	// _disruptorRes.shutdown();
 	_journal.close();
     }
 
@@ -135,6 +155,7 @@ public class EventBus {
 	// 启动disruptor,等待publish事件
 	_disruptor.start();
 
+	/*
 	// 创建返回查询结果消息的disruptor
 	_disruptorRes = 
 	    new Disruptor<TicketQueryResultEvent>
@@ -146,8 +167,10 @@ public class EventBus {
 	    );
 	// 在返回结果消息的时候，就不做任何日志和备份了。
 	_outRingBuffer = _disruptorRes.start();
+	*/
     }
 
+    /*
     // 等知道如何整合jersey异步调用后，删掉这个函数
     private static TicketQueryResultEvent waitForResponse(long sequence) {
 	while ( true ) {
@@ -158,5 +181,5 @@ public class EventBus {
 	    }
 	}
     }
-
+    */
 }

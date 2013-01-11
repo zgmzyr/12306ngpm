@@ -81,8 +81,11 @@ public class TicketResource {
 	}
 
 	public Train[] queryImpl(String trainId) {
+	    throw new UnsupportedOperationException("Jersey的方法已经过时了!");
+	    /*
 	    return EventBus.publishQueryEvent(trainId,
 					      new DateTime(),
 					      new DateTime());
+	    */
 	}
 }
