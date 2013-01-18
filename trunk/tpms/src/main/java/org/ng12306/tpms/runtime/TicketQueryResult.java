@@ -8,7 +8,7 @@ public class TicketQueryResult implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -4496121679957168355L;
-	private Boolean _hasTicket;
+    private Boolean _hasTicket = new Boolean(false);
 
 	public Boolean getHasTicket() {
 		return this._hasTicket;

@@ -2,6 +2,7 @@ package org.ng12306.tpms;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+import java.util.UUID;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelHandler;
@@ -19,16 +20,23 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-
 import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
 import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
-
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 
+import org.diting.collections.Predicate;
+import org.diting.collections.Queries;
+import org.joda.time.LocalDate;
+
+import org.ng12306.tpms.runtime.Train;
 import org.ng12306.tpms.runtime.TicketQueryArgs;
 import org.ng12306.tpms.runtime.TestRailwayRepository;
 import org.ng12306.tpms.runtime.TestTicketPoolManager;
 import org.ng12306.tpms.runtime.ServiceManager;
+import org.ng12306.tpms.runtime.TestTicketPool;
+import org.ng12306.tpms.runtime.TrainNumber;
+import org.ng12306.tpms.runtime.IRailwayRepository;
+import org.ng12306.tpms.runtime.ITicketPoolManager;
 
 // ITpServer的默认实现，如果要做A/B测试的话，应该是
 // 从TpServer继承实现两种方式
@@ -65,10 +73,14 @@ public class TpServer implements ITpServer {
 	  try { 
 	       // 如果eventbus因为日志\或者联系不上备份服务器而无法启动
 	       // 那么就关闭Netty服务器
-	       EventBus.start();
 	       registerService();
+	       createTicketPools();
+	       EventBus.start();
 	       _started = true;	       
-	  } catch ( Exception e ) {
+	  } catch ( Exception e ) {	       
+	       // TODO: 改成使用log4j之类的库来打印日志！
+	       System.out.println("start server failed with: " + e);
+	       e.printStackTrace();
 	       stopNettyServer();
 	  }
      }
@@ -96,6 +108,29 @@ public class TpServer implements ITpServer {
 			 new TestTicketPoolManager()});
      }
 
+     private void createTicketPools() throws Exception {
+	  IRailwayRepository repo = ServiceManager.getServices()
+	       .getRequiredService(IRailwayRepository.class);
+	  TrainNumber tn = Queries.query(repo.getTrainNumbers()).first(
+	       new Predicate<TrainNumber>() {		    
+		    @Override
+		    public boolean evaluate(TrainNumber obj) throws Exception {
+			 return obj.getName().equals("G101");
+		    }
+	       });
+
+	  LocalDate today = LocalDate.now();
+	  
+	  Train train = new Train();
+	  train.setId(UUID.randomUUID());
+	  train.setDepartureDate(today);
+	  train.setTrainNumber(tn);
+	  
+	  TestTicketPool pool = new TestTicketPool(train);
+	  pool.setSite(ServiceManager.getServices());
+	  pool.initialize();	 
+     }
+
      private void stopNettyServer()  {
 	  ChannelGroupFuture future = _channels.close();
 	  future.awaitUninterruptibly();
@@ -115,6 +150,7 @@ public class TpServer implements ITpServer {
 	       TicketQueryArgs event = (TicketQueryArgs)e.getMessage();
 	       // 传递给disruptor车轮队列进行处理。
 	       Channel channel = e.getChannel();
+	       event.channel = channel;
 	       EventBus.publishQueryEvent(event);       
 	  }
 

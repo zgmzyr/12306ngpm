@@ -82,7 +82,9 @@ public class TicketQueryArgs implements Serializable {
 	public void setCount(int value) {
 		this._count = value;
 	}
-	
+
+    // 在做序列化的时候,可以忽略这个属性
+    // 因为我们没有必要把客户端与服务器的连接也备份下来.
     public transient Channel channel;
 
 	private TicketQueryAction _action;

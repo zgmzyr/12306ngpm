@@ -12,6 +12,7 @@ import org.jboss.netty.channel.ChannelFutureListener;
 
 import org.ng12306.tpms.runtime.ServiceManager;
 import org.ng12306.tpms.runtime.TicketQueryArgs;
+import org.ng12306.tpms.runtime.TicketQueryResult;
 import org.ng12306.tpms.runtime.TicketQueryAction;
 import org.ng12306.tpms.runtime.TicketPoolQueryArgs;
 import org.ng12306.tpms.runtime.ITicketPoolManager;
@@ -57,16 +58,20 @@ public class EventBus {
 			    final boolean endOfBatch) throws Exception {
 	     // 根据车次号查询车次详细信息	       
 	     ITicketPool pool = EventBus._poolManger.getPool(event);
+	     TicketQueryResult result = new TicketQueryResult();
 	     
 	     // TODO: 这段代码尚有争议，因为查询车票应该返回有票的车次列表。
 	     if (pool != null) {
 		  TicketPoolQueryArgs poolArgs = pool
 		       .toTicketPoolQueryArgs(event);
 		  if (event.getAction() == TicketQueryAction.Query) {
-		       boolean result = pool.hasTickets(poolArgs);
-		       // result 直接丢弃result了。
+		      result.setHasTicket(pool.hasTickets(poolArgs));
 		  }
 	     }
+	     
+	     // 无论什么样的结果,都需要向客户端发送一个响应.
+	     ChannelFuture future = event.channel.write(result);	    
+	     future.addListener(ChannelFutureListener.CLOSE);
 
 	     /*
 	     // 不管找到与否，都会有一个响应
