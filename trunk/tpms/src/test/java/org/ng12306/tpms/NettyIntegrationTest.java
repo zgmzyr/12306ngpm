@@ -27,7 +27,6 @@ import static org.ng12306.tpms.support.TestConstants.*;
 import org.ng12306.tpms.runtime.*;
 import org.ng12306.tpms.support.ObjectBsonEncoder;
 import org.ng12306.tpms.support.ObjectBsonDecoder;
-import org.ng12306.tpms.support.TestNettyServer;
 
 public class NettyIntegrationTest {
      class TestQueryTrainServerHandler extends SimpleChannelUpstreamHandler {
@@ -44,8 +43,6 @@ public class NettyIntegrationTest {
      class TestQueryTrainHandler extends SimpleChannelUpstreamHandler {
 	  // 要向服务器发送的查询数据包 - 包含车次号
 	  private final TicketQueryArgs _event;
-	  // private Train[] _response;
-	  // public Train[] getResponse() { return _response; }
 	  private TicketQueryResult _response;
 	  public TicketQueryResult getResponse() { return _response; }
 	 
@@ -65,7 +62,6 @@ public class NettyIntegrationTest {
 	  @Override
 	  public void messageReceived(ChannelHandlerContext ctx,
 				      MessageEvent e) {
-	       // _response = (Train[])e.getMessage();
 	       _response = (TicketQueryResult)e.getMessage();
 	       e.getChannel().close();
 	  }
@@ -75,65 +71,6 @@ public class NettyIntegrationTest {
 				      ExceptionEvent e) {
 	       e.getCause().printStackTrace();
 	       e.getChannel().close();
-	  }
-     }
-     
-     // @Test
-     public void 试验根据车次查询结果() throws Exception {
-	  // 启动Netty服务，这个函数应该要放到setUp函数里
-	  startTestServer();
-
-	  try {
-	       final TestQueryTrainHandler handler = 
-		    new TestQueryTrainHandler("G101");
-
-	       connectToServer(handler);
-
-	       // 等待一秒钟
-	       Thread.sleep(1000);
-	       
-	       // 并验证
-	       TicketQueryResult result = handler.getResponse();
-	       assertTrue(result.getHasTicket());
-
-	       /*
-	       Train[] results = handler.getResponse();
-	       assertNotNull(results);
-	       Train result = results[0];
-	       
-	       assertEquals("G101", result.name);
-	       assertEquals("北京南", result.departure);
-	       assertEquals("上海虹桥", result.termination);
-	       
-	       // 一个车次的发车时间应该只有时间，没有日期。
-	       assertEquals("07:00",
-			    result.departureTime);
-	       assertEquals("12:23",
-			    result.arrivalTime);
-	       
-	       // TODO: 这个断言是有问题的,因为我没有车次的具体座位配置.
-	       // 等业务网关组的服务出来之后，再来更新这个测试用例
-	       assertEquals(2, result.availables.length);
-	       */
-	  } finally { 
-	       stopTestServer();
-	  }
-     }
-     
-     // 这个仅仅是测试用的服务器 - 用来试验Netty API的
-     private TestNettyServer _server;
-     private void startTestServer() throws Exception {	 
-	  registerService();
-	  EventBus.start();
-	  _server = new TestNettyServer(TP_SERVER_PORT,
-					new TestQueryTrainServerHandler());
-	  _server.start();
-     }
-
-     private void stopTestServer() throws Exception {
-	  if ( _server != null ) {
-	       EventBus.shutdown();
-	       _server.stop();
 	  }
      }
 
@@ -165,25 +102,6 @@ public class NettyIntegrationTest {
 	       // 并验证
 	       TicketQueryResult result = handler.getResponse();
 	       assertTrue(result.getHasTicket());
-	       /*
-	       Train[] results = handler.getResponse();
-	       assertNotNull(results);
-	       Train result = results[0];
-	       
-	       assertEquals("G101", result.name);
-	       assertEquals("北京南", result.departure);
-	       assertEquals("上海虹桥", result.termination);
-	       
-	       // 一个车次的发车时间应该只有时间，没有日期。
-	       assertEquals("07:00",
-			    result.departureTime);
-	       assertEquals("12:23",
-			    result.arrivalTime);
-	       
-	       // TODO: 这个断言是有问题的,因为我没有车次的具体座位配置.
-	       // 等业务网关组的服务出来之后，再来更新这个测试用例
-	       assertEquals(2, result.availables.length);
-	       */
 	  } finally { 
 	       stopRealServer();
 	  }

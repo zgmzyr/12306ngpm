@@ -38,8 +38,6 @@ public class EventBus {
 	       // brucesea的反馈: 查询不改变状态，Journalist和Replicator感觉就用不着了，
 	       // 对改变状态的操作Journalist和Replicator一下
 	       // 因此需要根据TicketQueryArgs的类型来决定是否做日志和备份
-	       
-	       // _journal.writeObject(event);
 	  }
      };
      
@@ -72,23 +70,6 @@ public class EventBus {
 	     // 无论什么样的结果,都需要向客户端发送一个响应.
 	     ChannelFuture future = event.channel.write(result);	    
 	     future.addListener(ChannelFutureListener.CLOSE);
-
-	     /*
-	     // 不管找到与否，都会有一个响应
-	    Train[] trains = null;
-	    if ( train != null ) {
-		trains = new Train[] { train };
-	    } else { 
-		trains = new Train[0];
-	    }
-
-	    // 将查询结果直接写到附在事件上的客户端端口上。
-	    // 请求处理的结果不备份，因为没有必要，如果客户端收不到反馈，
-	    // 它需要再发一次，否则的话，难道票池在恢复时还要遍历备份
-	    // 再重发响应？
-	    ChannelFuture future = event.channel.write(trains);	    
-	    future.addListener(ChannelFutureListener.CLOSE);
-	     */
 	}
     };
     
@@ -103,7 +84,6 @@ public class EventBus {
 	long sequence = _ringBuffer.next();
 	TicketQueryArgs event = _ringBuffer.get(sequence);
 	args.copyTo(event);
-	// event.sequence = sequence;
 	event.setSequence(sequence);
 
 	// 将消息放到车轮队列里，以便处理
@@ -123,7 +103,6 @@ public class EventBus {
 	// 先关闭掉disruptor，再关闭日志文件
 	// 以免出现日志线程和disruptor关闭同时运行的情况
 	_disruptor.shutdown();
-	// _disruptorRes.shutdown();
 	_journal.close();
     }
 
