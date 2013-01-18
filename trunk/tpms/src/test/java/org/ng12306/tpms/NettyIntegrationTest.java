@@ -40,9 +40,9 @@ public class NettyIntegrationTest {
 	  }
      }
 
-     // ÓÃÓÚÔÚ²âÊÔÓÃÀıÀïÏòÆ±³Ø·şÎñ·¢ËÍ³µ´Î²éÑ¯µÄNetty´¦Àíº¯Êı
+     // ç”¨äºåœ¨æµ‹è¯•ç”¨ä¾‹é‡Œå‘ç¥¨æ± æœåŠ¡å‘é€è½¦æ¬¡æŸ¥è¯¢çš„Nettyå¤„ç†å‡½æ•°
      class TestQueryTrainHandler extends SimpleChannelUpstreamHandler {
-	  // ÒªÏò·şÎñÆ÷·¢ËÍµÄ²éÑ¯Êı¾İ°ü - °üº¬³µ´ÎºÅ
+	  // è¦å‘æœåŠ¡å™¨å‘é€çš„æŸ¥è¯¢æ•°æ®åŒ… - åŒ…å«è½¦æ¬¡å·
 	  private final TicketQueryArgs _event;
 	  private Train[] _response;
 	  public Train[] getResponse() { return _response; }
@@ -75,8 +75,8 @@ public class NettyIntegrationTest {
      }
      
      @Test
-     public void ÊÔÑé¸ù¾İ³µ´Î²éÑ¯½á¹û() throws Exception {
-	  // Æô¶¯Netty·şÎñ£¬Õâ¸öº¯ÊıÓ¦¸ÃÒª·Åµ½setUpº¯ÊıÀï
+     public void è¯•éªŒæ ¹æ®è½¦æ¬¡æŸ¥è¯¢ç»“æœ() throws Exception {
+	  // å¯åŠ¨NettyæœåŠ¡ï¼Œè¿™ä¸ªå‡½æ•°åº”è¯¥è¦æ”¾åˆ°setUpå‡½æ•°é‡Œ
 	  startTestServer();
 
 	  try {
@@ -85,33 +85,33 @@ public class NettyIntegrationTest {
 
 	       connectToServer(handler);
 
-	       // µÈ´ıÒ»ÃëÖÓ
+	       // ç­‰å¾…ä¸€ç§’é’Ÿ
 	       Thread.sleep(1000);
 	       
-	       // ²¢ÑéÖ¤
+	       // å¹¶éªŒè¯
 	       Train[] results = handler.getResponse();
 	       assertNotNull(results);
 	       Train result = results[0];
 	       
 	       assertEquals("G101", result.name);
-	       assertEquals("±±¾©ÄÏ", result.departure);
-	       assertEquals("ÉÏº£ºçÇÅ", result.termination);
+	       assertEquals("åŒ—äº¬å—", result.departure);
+	       assertEquals("ä¸Šæµ·è™¹æ¡¥", result.termination);
 	       
-	       // Ò»¸ö³µ´ÎµÄ·¢³µÊ±¼äÓ¦¸ÃÖ»ÓĞÊ±¼ä£¬Ã»ÓĞÈÕÆÚ¡£
+	       // ä¸€ä¸ªè½¦æ¬¡çš„å‘è½¦æ—¶é—´åº”è¯¥åªæœ‰æ—¶é—´ï¼Œæ²¡æœ‰æ—¥æœŸã€‚
 	       assertEquals("07:00",
 			    result.departureTime);
 	       assertEquals("12:23",
 			    result.arrivalTime);
 	       
-	       // TODO: Õâ¸ö¶ÏÑÔÊÇÓĞÎÊÌâµÄ,ÒòÎªÎÒÃ»ÓĞ³µ´ÎµÄ¾ßÌå×ùÎ»ÅäÖÃ.
-	       // µÈÒµÎñÍø¹Ø×éµÄ·şÎñ³öÀ´Ö®ºó£¬ÔÙÀ´¸üĞÂÕâ¸ö²âÊÔÓÃÀı
+	       // TODO: è¿™ä¸ªæ–­è¨€æ˜¯æœ‰é—®é¢˜çš„,å› ä¸ºæˆ‘æ²¡æœ‰è½¦æ¬¡çš„å…·ä½“åº§ä½é…ç½®.
+	       // ç­‰ä¸šåŠ¡ç½‘å…³ç»„çš„æœåŠ¡å‡ºæ¥ä¹‹åï¼Œå†æ¥æ›´æ–°è¿™ä¸ªæµ‹è¯•ç”¨ä¾‹
 	       assertEquals(2, result.availables.length);
 	  } finally { 
 	       stopTestServer();
 	  }
      }
      
-     // Õâ¸ö½ö½öÊÇ²âÊÔÓÃµÄ·şÎñÆ÷ - ÓÃÀ´ÊÔÑéNetty APIµÄ
+     // è¿™ä¸ªä»…ä»…æ˜¯æµ‹è¯•ç”¨çš„æœåŠ¡å™¨ - ç”¨æ¥è¯•éªŒNetty APIçš„
      private TestNettyServer _server;
      private void startTestServer() throws Exception {	 
 	  registerService();
@@ -128,8 +128,8 @@ public class NettyIntegrationTest {
 	  }
      }
 
-     // ¸ù¾İ³æ×ÓµÄ´úÂë,ËùÓĞµÄ·şÎñ¶¼ĞèÒªÔ¤ÏÈ×¢²á,È»ºóÔÙÊ¹ÓÃÊ±,Í¨¹ıgetRequiredService
-     // »ñÈ¡,ÀàËÆIoc,Òò´Ë·şÎñÆ÷ÔÚÆô¶¯Ê±,ĞèÒª×¢²áÕâĞ©·şÎñ
+     // æ ¹æ®è™«å­çš„ä»£ç ,æ‰€æœ‰çš„æœåŠ¡éƒ½éœ€è¦é¢„å…ˆæ³¨å†Œ,ç„¶åå†ä½¿ç”¨æ—¶,é€šè¿‡getRequiredService
+     // è·å–,ç±»ä¼¼Ioc,å› æ­¤æœåŠ¡å™¨åœ¨å¯åŠ¨æ—¶,éœ€è¦æ³¨å†Œè¿™äº›æœåŠ¡
      private void registerService() throws Exception {
 	  ServiceManager
 	       .getServices()
@@ -139,51 +139,51 @@ public class NettyIntegrationTest {
      }
 
      @Test
-     public void ÓÉ³µ´Î²éÑ¯½á¹û¶¨ÒåÆ±³Ø·şÎñÆ÷API() throws Exception {
-	  // Æô¶¯Netty·şÎñ£¬Õâ¸öº¯ÊıÓ¦¸ÃÒª·Åµ½setUpº¯ÊıÀï
+     public void ç”±è½¦æ¬¡æŸ¥è¯¢ç»“æœå®šä¹‰ç¥¨æ± æœåŠ¡å™¨API() throws Exception {
+	  // å¯åŠ¨NettyæœåŠ¡ï¼Œè¿™ä¸ªå‡½æ•°åº”è¯¥è¦æ”¾åˆ°setUpå‡½æ•°é‡Œ
 	  startRealServer();
 
 	  try {
 	       final TestQueryTrainHandler handler = 
 		    new TestQueryTrainHandler("G101");
 	       
-	       // ¿Í»§¶ËµÄ¹¤×÷¾ÍÊÇÏò·şÎñÆ÷·¢ËÍÒ»¸ö³µ´Î²éÑ¯BSONÇëÇó
+	       // å®¢æˆ·ç«¯çš„å·¥ä½œå°±æ˜¯å‘æœåŠ¡å™¨å‘é€ä¸€ä¸ªè½¦æ¬¡æŸ¥è¯¢BSONè¯·æ±‚
 	       connectToServer(handler);
 	        
-	       // µÈ´ıÒ»ÃëÖÓ
+	       // ç­‰å¾…ä¸€ç§’é’Ÿ
 	       Thread.sleep(1000);
 	       
-	       // ²¢ÑéÖ¤
+	       // å¹¶éªŒè¯
 	       Train[] results = handler.getResponse();
 	       assertNotNull(results);
 	       Train result = results[0];
 	       
 	       assertEquals("G101", result.name);
-	       assertEquals("±±¾©ÄÏ", result.departure);
-	       assertEquals("ÉÏº£ºçÇÅ", result.termination);
+	       assertEquals("åŒ—äº¬å—", result.departure);
+	       assertEquals("ä¸Šæµ·è™¹æ¡¥", result.termination);
 	       
-	       // Ò»¸ö³µ´ÎµÄ·¢³µÊ±¼äÓ¦¸ÃÖ»ÓĞÊ±¼ä£¬Ã»ÓĞÈÕÆÚ¡£
+	       // ä¸€ä¸ªè½¦æ¬¡çš„å‘è½¦æ—¶é—´åº”è¯¥åªæœ‰æ—¶é—´ï¼Œæ²¡æœ‰æ—¥æœŸã€‚
 	       assertEquals("07:00",
 			    result.departureTime);
 	       assertEquals("12:23",
 			    result.arrivalTime);
 	       
-	       // TODO: Õâ¸ö¶ÏÑÔÊÇÓĞÎÊÌâµÄ,ÒòÎªÎÒÃ»ÓĞ³µ´ÎµÄ¾ßÌå×ùÎ»ÅäÖÃ.
-	       // µÈÒµÎñÍø¹Ø×éµÄ·şÎñ³öÀ´Ö®ºó£¬ÔÙÀ´¸üĞÂÕâ¸ö²âÊÔÓÃÀı
+	       // TODO: è¿™ä¸ªæ–­è¨€æ˜¯æœ‰é—®é¢˜çš„,å› ä¸ºæˆ‘æ²¡æœ‰è½¦æ¬¡çš„å…·ä½“åº§ä½é…ç½®.
+	       // ç­‰ä¸šåŠ¡ç½‘å…³ç»„çš„æœåŠ¡å‡ºæ¥ä¹‹åï¼Œå†æ¥æ›´æ–°è¿™ä¸ªæµ‹è¯•ç”¨ä¾‹
 	       assertEquals(2, result.availables.length);
 	  } finally { 
 	       stopRealServer();
 	  }
      }
 
-     // Õâ¸ö¾ÍÊÇÕæÕıµÄÆ±³Ø·şÎñÆ÷ÁË£¬ÎªÁËÒş²ØºóÃæµÄ¾ßÌåÊµÏÖ£¬¶¨ÒåÒ»¸ö½Ó¿ÚITpServer
+     // è¿™ä¸ªå°±æ˜¯çœŸæ­£çš„ç¥¨æ± æœåŠ¡å™¨äº†ï¼Œä¸ºäº†éšè—åé¢çš„å…·ä½“å®ç°ï¼Œå®šä¹‰ä¸€ä¸ªæ¥å£ITpServer
      private ITpServer _itpServer;
      private void startRealServer() throws Exception {
-	  // TODO: TpServerÓ¦¸ÃÓÉIoc´´½¨£¬
-	  // ÏÖÔÚÎªÁË¶¨ÒåAPI¾ÍÖ±½Ó´´½¨ĞÂÊµÀıÁË¡£
+	  // TODO: TpServeråº”è¯¥ç”±Iocåˆ›å»ºï¼Œ
+	  // ç°åœ¨ä¸ºäº†å®šä¹‰APIå°±ç›´æ¥åˆ›å»ºæ–°å®ä¾‹äº†ã€‚
 	  _itpServer = new TpServer(TP_SERVER_PORT);
 
-	  // Æ±³Ø·şÎñÆ÷Ó¦¸ÃÆô¶¯disruptor event bus¡£
+	  // ç¥¨æ± æœåŠ¡å™¨åº”è¯¥å¯åŠ¨disruptor event busã€‚
 	  _itpServer.start();
      }
 
@@ -193,13 +193,13 @@ public class NettyIntegrationTest {
 	  }
      }
 
-     // ÎÒÌØ·³JavaÇ¿ÖÆÔÚº¯ÊıÀïÉùÃ÷×Ô¼º¿ÉÄÜÈÓ³öµÄÒì³££¬ÎÒÖªµÀJavaµÄ³õÖÔÊÇºÃµÄ£¬µ«ÊÇ
+     // æˆ‘ç‰¹çƒ¦Javaå¼ºåˆ¶åœ¨å‡½æ•°é‡Œå£°æ˜è‡ªå·±å¯èƒ½æ‰”å‡ºçš„å¼‚å¸¸ï¼Œæˆ‘çŸ¥é“Javaçš„åˆè¡·æ˜¯å¥½çš„ï¼Œä½†æ˜¯
      // ...
      // ...
      // ...
-     // JavaµÄÉè¼ÆÊ¦ÃÇ¾ÍÃ»ÓĞÔ¤¼û¹ı»áÓĞºÜ¶àÈËtry ... catch (Exception e)Âğ?
+     // Javaçš„è®¾è®¡å¸ˆä»¬å°±æ²¡æœ‰é¢„è§è¿‡ä¼šæœ‰å¾ˆå¤šäººtry ... catch (Exception e)å—?
      private void connectToServer(final ChannelHandler sendRequest) throws Exception {
-	  // Õâ¸ö´úÂëÊÇ´ÓNetty¹ÙÍø³­À´µÄ£¬ÔİÊ±»¹²»ÖªµÀÎªÊ²Ã´ÒªÕâÃ´×ö£¡
+	  // è¿™ä¸ªä»£ç æ˜¯ä»Nettyå®˜ç½‘æŠ„æ¥çš„ï¼Œæš‚æ—¶è¿˜ä¸çŸ¥é“ä¸ºä»€ä¹ˆè¦è¿™ä¹ˆåšï¼
 	  ChannelFactory factory = new NioClientSocketChannelFactory(
 	       Executors.newCachedThreadPool(),
 	       Executors.newCachedThreadPool());
@@ -207,9 +207,9 @@ public class NettyIntegrationTest {
 	  bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 		    public ChannelPipeline getPipeline() 
 			 throws Exception {
-			 // ²éÑ¯G101
+			 // æŸ¥è¯¢G101
 			 return Channels.pipeline(
-			      // Ê¹ÓÃ×Ô¶¨ÒåµÄbson¸ñÊ½ĞòÁĞ»¯
+			      // ä½¿ç”¨è‡ªå®šä¹‰çš„bsonæ ¼å¼åºåˆ—åŒ–
 			      new ObjectBsonEncoder(),
 			      new ObjectBsonDecoder(
 				   ClassResolvers.cacheDisabled(
@@ -217,12 +217,12 @@ public class NettyIntegrationTest {
 			      sendRequest);
 		    }
 	       });
-	  // ÏÂÃæµÄÉèÖÃÃ²ËÆÊÇTCP³¤Á¬½Ó£¬²»¹ıÎÒÃÇµÄ¼Æ»®ÊÇ½«Æä¸üĞÂ³ÉUDP
-	  // Òò´ËÒ²Ö±½Ó³­Netty¹ÙÍøµÄÊ¾Àı³ÌĞòºÃÁË£¡
+	  // ä¸‹é¢çš„è®¾ç½®è²Œä¼¼æ˜¯TCPé•¿è¿æ¥ï¼Œä¸è¿‡æˆ‘ä»¬çš„è®¡åˆ’æ˜¯å°†å…¶æ›´æ–°æˆUDP
+	  // å› æ­¤ä¹Ÿç›´æ¥æŠ„Nettyå®˜ç½‘çš„ç¤ºä¾‹ç¨‹åºå¥½äº†ï¼
 	  bootstrap.setOption("tcpNoDelay", true);
 	  bootstrap.setOption("keepAlive", true);
 	  
-	  // Á¬½Óµ½·şÎñÆ÷
+	  // è¿æ¥åˆ°æœåŠ¡å™¨
 	  bootstrap.connect(new InetSocketAddress(TP_SERVER_ADDRESS,
 						  TP_SERVER_PORT));	      
      }

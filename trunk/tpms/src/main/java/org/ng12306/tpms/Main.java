@@ -31,18 +31,18 @@ public class Main {
     	
     	ServiceManager.getServices().initializeServices(new Object[] {new TestRailwayRepository(), new TestTicketPoolManager()});
     	
-	// 启动jersey restful服务
+	// 鍚姩jersey restful鏈嶅姟
         SelectorThread threadSelector = startServer();
-	// 启动disruptor服务
+	// 鍚姩disruptor鏈嶅姟
 	EventBus.start();
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...",
                 BASE_URI));
         System.in.read();
 
-	// 关闭disruptor消息队列
+	// 鍏抽棴disruptor娑堟伅闃熷垪
 	EventBus.shutdown();
-	// 关闭jersey restful服务
+	// 鍏抽棴jersey restful鏈嶅姟
         threadSelector.stopEndpoint();
         
         ServiceManager.getServices().uninitializeServices();

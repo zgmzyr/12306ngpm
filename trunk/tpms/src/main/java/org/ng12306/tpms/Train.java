@@ -6,22 +6,22 @@ import java.io.Serializable;
 
 @XmlRootElement
 public class Train implements Serializable {
-    // ³µ´ÎºÅ
+    // è½¦æ¬¡å·
     public String name;
 
-    // Ê¼·¢Õ¾
+    // å§‹å‘ç«™
     public String departure;
 
-    // ·¢³µÊ±¼ä
+    // å‘è½¦æ—¶é—´
     public String departureTime;
 
-    // ÖÕµãÕ¾
+    // ç»ˆç‚¹ç«™
     public String termination;
 
-    // µ½´ïÊ±¼ä
+    // åˆ°è¾¾æ—¶é—´
     public String arrivalTime;
 
-    // ÓàÆ±ĞÅÏ¢
+    // ä½™ç¥¨ä¿¡æ¯
     @XmlElement
     public String[][] availables;
 }

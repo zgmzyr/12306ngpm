@@ -110,7 +110,7 @@ public class TestRailwayRepository extends ServiceBase
 
 	private void initCarTypes() {
 		this._carTypes = new CarType[4];
-		this._carTypes[0] = new CarType(UUID.randomUUID(), "Ó²×ù³µ", 1L);
+		this._carTypes[0] = new CarType(UUID.randomUUID(), "ç¡¬åº§è½¦", 1L);
 		for(int i = 1; i <= 118; i ++)
 		{
 			Seat seat = new Seat();
@@ -120,7 +120,7 @@ public class TestRailwayRepository extends ServiceBase
 		    this._carTypes[0].getSeats().add(seat);
 		}
 		
-		this._carTypes[1] = new CarType(UUID.randomUUID(), "Ó²ÎÔ³µ", 4L);
+		this._carTypes[1] = new CarType(UUID.randomUUID(), "ç¡¬å§è½¦", 4L);
 		for(int i = 1; i <= 66; i ++)
 		{
 			Seat seat = new Seat();
@@ -131,7 +131,7 @@ public class TestRailwayRepository extends ServiceBase
 		}
 		
 	
-		this._carTypes[2] = new CarType(UUID.randomUUID(), "Èí×ù³µ", 2L);
+		this._carTypes[2] = new CarType(UUID.randomUUID(), "è½¯åº§è½¦", 2L);
 		for(int i = 1; i <= 118; i ++)
 		{
 			Seat seat = new Seat();
@@ -141,7 +141,7 @@ public class TestRailwayRepository extends ServiceBase
 		    this._carTypes[2].getSeats().add(seat);
 		}
 		
-		this._carTypes[3] = new CarType(UUID.randomUUID(), "¶þ¼¶ÈíÎÔ", 8L);
+		this._carTypes[3] = new CarType(UUID.randomUUID(), "äºŒçº§è½¯å§", 8L);
 		for(int i = 1; i <= 44; i ++)
 		{
 			Seat seat = new Seat();
@@ -157,19 +157,19 @@ public class TestRailwayRepository extends ServiceBase
 	private void initSeatTypes() {
 	
 		this._seatTypes = new SeatType[] {
-				new SeatType(UUID.randomUUID(), "Ó²×ù", 1L),
-				new SeatType(UUID.randomUUID(), "Èí×ù", 2L),
-				new SeatType(UUID.randomUUID(), "Ó²ÎÔ", 4L),
-				new SeatType(UUID.randomUUID(), "¶þ¼¶ÈíÎÔ", 8L),
-				new SeatType(UUID.randomUUID(), "Ò»¼¶ÈíÎÔ ", 0x10L)
+				new SeatType(UUID.randomUUID(), "ç¡¬åº§", 1L),
+				new SeatType(UUID.randomUUID(), "è½¯åº§", 2L),
+				new SeatType(UUID.randomUUID(), "ç¡¬å§", 4L),
+				new SeatType(UUID.randomUUID(), "äºŒçº§è½¯å§", 8L),
+				new SeatType(UUID.randomUUID(), "ä¸€çº§è½¯å§ ", 0x10L)
 		};
 	}
 
 	private void initStations() {
-		String[] names = new String[] {"±±¾©ÄÏ", "¼ÃÄÏÎ÷","Çú¸·¶«", "Ôæ×¯", "ÄÏ¾©ÄÏ","³£ÖÝ±±","ÎÞÎý¶«","ÉÏº£ºçÇÅ", 
-				"ÉØ¹Ø¶«","³»ÖÝ","ºâÑô","ÖêÖÞ", "³¤É³","ÔÀÑô", "³à±Ú", "Îä²ý", "Ð¢¸Ð", "¹ãË®", "ÐÅÑô","×¤Âíµê", "ËìÆ½",
-				"äðºÓ", "Ðí²ý", "Ö£ÖÝ", "ÐÂÏç", "°²Ñô", "ºªµ¦", "ÐÏÌ¨", "Ê¯¼Ò×¯", "¶¨ÖÝ", "±£¶¨", "¸ß±®µê", "±±¾©Î÷",
-				"É³³Ç", "ÕÅ¼Ò¿ÚÄÏ", "´óÍ¬", "·áÕò", "¼¯ÄþÄÏ", "ºôºÍºÆÌØ¶«", "°üÍ·¶«", "°üÍ·"};
+		String[] names = new String[] {"åŒ—äº¬å—", "æµŽå—è¥¿","æ›²é˜œä¸œ", "æž£åº„", "å—äº¬å—","å¸¸å·žåŒ—","æ— é”¡ä¸œ","ä¸Šæµ·è™¹æ¡¥", 
+				"éŸ¶å…³ä¸œ","éƒ´å·ž","è¡¡é˜³","æ ªæ´²", "é•¿æ²™","å²³é˜³", "èµ¤å£", "æ­¦æ˜Œ", "å­æ„Ÿ", "å¹¿æ°´", "ä¿¡é˜³","é©»é©¬åº—", "é‚å¹³",
+				"æ¼¯æ²³", "è®¸æ˜Œ", "éƒ‘å·ž", "æ–°ä¹¡", "å®‰é˜³", "é‚¯éƒ¸", "é‚¢å°", "çŸ³å®¶åº„", "å®šå·ž", "ä¿å®š", "é«˜ç¢‘åº—", "åŒ—äº¬è¥¿",
+				"æ²™åŸŽ", "å¼ å®¶å£å—", "å¤§åŒ", "ä¸°é•‡", "é›†å®å—", "å‘¼å’Œæµ©ç‰¹ä¸œ", "åŒ…å¤´ä¸œ", "åŒ…å¤´"};
 		this._stations = Queries.query(names).select(new Selector<String, Station>(){
 
 			@Override

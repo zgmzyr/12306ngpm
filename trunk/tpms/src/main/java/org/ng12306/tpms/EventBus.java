@@ -23,30 +23,30 @@ public class EventBus {
      private static Disruptor<TicketQueryArgs> _disruptor;
      private static ITicketPoolManager _poolManger;
      
-     // ÈÕÖ¾Ïß³Ì
+     // æ—¥å¿—çº¿ç¨‹
      static final EventHandler<TicketQueryArgs> _journalist = 
 	  new EventHandler<TicketQueryArgs>() {
 	  public void onEvent(final TicketQueryArgs event, 
 			      final long sequence,
 			      final boolean endOfBatch) throws Exception {
-	       // TODO: ĞèÒªÈ·±£³ÌĞò±ÀÀ£µÄÊ±ºò£¬ËùÓĞµÄÊı¾İ¶¼ÔÚÓ²ÅÌÉÏ
-	       // ÒòÎªÔÚÓ²ÅÌÉÏÓĞÒ»¸ö»º³åÇø£¬ĞèÒªÈ·±£¼´Ê¹³ÌĞò±ÀÀ£Ò²ÄÜ°Ñ»º³åÀïµÄÊı¾İ
-	       // Ğ´µ½Ó²ÅÌÉÏ£¬²»¹ıÃ²ËÆÏÖ´ú²Ù×÷ÏµÍ³ÄÜ¹»×öµ½ÔÚ³ÌĞò±ÀÀ£Ê±flush»º´æ£¬Õâµã
-	       // ĞèÒª²âÊÔÑéÖ¤¡£
+	       // TODO: éœ€è¦ç¡®ä¿ç¨‹åºå´©æºƒçš„æ—¶å€™ï¼Œæ‰€æœ‰çš„æ•°æ®éƒ½åœ¨ç¡¬ç›˜ä¸Š
+	       // å› ä¸ºåœ¨ç¡¬ç›˜ä¸Šæœ‰ä¸€ä¸ªç¼“å†²åŒºï¼Œéœ€è¦ç¡®ä¿å³ä½¿ç¨‹åºå´©æºƒä¹Ÿèƒ½æŠŠç¼“å†²é‡Œçš„æ•°æ®
+	       // å†™åˆ°ç¡¬ç›˜ä¸Šï¼Œä¸è¿‡è²Œä¼¼ç°ä»£æ“ä½œç³»ç»Ÿèƒ½å¤Ÿåšåˆ°åœ¨ç¨‹åºå´©æºƒæ—¶flushç¼“å­˜ï¼Œè¿™ç‚¹
+	       // éœ€è¦æµ‹è¯•éªŒè¯ã€‚
 
-	       // bruceseaµÄ·´À¡: ²éÑ¯²»¸Ä±ä×´Ì¬£¬JournalistºÍReplicator¸Ğ¾õ¾ÍÓÃ²»×ÅÁË£¬
-	       // ¶Ô¸Ä±ä×´Ì¬µÄ²Ù×÷JournalistºÍReplicatorÒ»ÏÂ
-	       // Òò´ËĞèÒª¸ù¾İTicketQueryArgsµÄÀàĞÍÀ´¾ö¶¨ÊÇ·ñ×öÈÕÖ¾ºÍ±¸·İ
+	       // bruceseaçš„åé¦ˆ: æŸ¥è¯¢ä¸æ”¹å˜çŠ¶æ€ï¼ŒJournalistå’ŒReplicatoræ„Ÿè§‰å°±ç”¨ä¸ç€äº†ï¼Œ
+	       // å¯¹æ”¹å˜çŠ¶æ€çš„æ“ä½œJournalistå’ŒReplicatorä¸€ä¸‹
+	       // å› æ­¤éœ€è¦æ ¹æ®TicketQueryArgsçš„ç±»å‹æ¥å†³å®šæ˜¯å¦åšæ—¥å¿—å’Œå¤‡ä»½
 	       
 	       // _journal.writeObject(event);
 	  }
      };
      
-     // ½«ÊÂ¼ş·¢ËÍµ½±¸·İ·şÎñÆ÷±£´æµÄ±¸·İÏß³Ì
+     // å°†äº‹ä»¶å‘é€åˆ°å¤‡ä»½æœåŠ¡å™¨ä¿å­˜çš„å¤‡ä»½çº¿ç¨‹
      static final EventHandler<TicketQueryArgs> _replicator = new EventHandler<TicketQueryArgs>() {
 	  public void onEvent(final TicketQueryArgs event, final long sequence,
 			      final boolean endOfBatch) throws Exception {
-	       // TODO: ºóÆÚÔÙÊµÏÖ±¸·İÏß³ÌµÄÂß¼­
+	       // TODO: åæœŸå†å®ç°å¤‡ä»½çº¿ç¨‹çš„é€»è¾‘
 	  }
      };
 
@@ -55,21 +55,21 @@ public class EventBus {
 	public void onEvent(final TicketQueryArgs event,
 			    final long sequence,
 			    final boolean endOfBatch) throws Exception {
-	     // ¸ù¾İ³µ´ÎºÅ²éÑ¯³µ´ÎÏêÏ¸ĞÅÏ¢	       
+	     // æ ¹æ®è½¦æ¬¡å·æŸ¥è¯¢è½¦æ¬¡è¯¦ç»†ä¿¡æ¯	       
 	     ITicketPool pool = EventBus._poolManger.getPool(event);
 	     
-	     // TODO: Õâ¶Î´úÂëÉĞÓĞÕùÒé£¬ÒòÎª²éÑ¯³µÆ±Ó¦¸Ã·µ»ØÓĞÆ±µÄ³µ´ÎÁĞ±í¡£
+	     // TODO: è¿™æ®µä»£ç å°šæœ‰äº‰è®®ï¼Œå› ä¸ºæŸ¥è¯¢è½¦ç¥¨åº”è¯¥è¿”å›æœ‰ç¥¨çš„è½¦æ¬¡åˆ—è¡¨ã€‚
 	     if (pool != null) {
 		  TicketPoolQueryArgs poolArgs = pool
 		       .toTicketPoolQueryArgs(event);
 		  if (event.getAction() == TicketQueryAction.Query) {
 		       boolean result = pool.hasTickets(poolArgs);
-		       // result Ö±½Ó¶ªÆúresultÁË¡£
+		       // result ç›´æ¥ä¸¢å¼ƒresultäº†ã€‚
 		  }
 	     }
 
 	     /*
-	     // ²»¹ÜÕÒµ½Óë·ñ£¬¶¼»áÓĞÒ»¸öÏìÓ¦
+	     // ä¸ç®¡æ‰¾åˆ°ä¸å¦ï¼Œéƒ½ä¼šæœ‰ä¸€ä¸ªå“åº”
 	    Train[] trains = null;
 	    if ( train != null ) {
 		trains = new Train[] { train };
@@ -77,23 +77,23 @@ public class EventBus {
 		trains = new Train[0];
 	    }
 
-	    // ½«²éÑ¯½á¹ûÖ±½ÓĞ´µ½¸½ÔÚÊÂ¼şÉÏµÄ¿Í»§¶Ë¶Ë¿ÚÉÏ¡£
-	    // ÇëÇó´¦ÀíµÄ½á¹û²»±¸·İ£¬ÒòÎªÃ»ÓĞ±ØÒª£¬Èç¹û¿Í»§¶ËÊÕ²»µ½·´À¡£¬
-	    // ËüĞèÒªÔÙ·¢Ò»´Î£¬·ñÔòµÄ»°£¬ÄÑµÀÆ±³ØÔÚ»Ö¸´Ê±»¹Òª±éÀú±¸·İ
-	    // ÔÙÖØ·¢ÏìÓ¦£¿
+	    // å°†æŸ¥è¯¢ç»“æœç›´æ¥å†™åˆ°é™„åœ¨äº‹ä»¶ä¸Šçš„å®¢æˆ·ç«¯ç«¯å£ä¸Šã€‚
+	    // è¯·æ±‚å¤„ç†çš„ç»“æœä¸å¤‡ä»½ï¼Œå› ä¸ºæ²¡æœ‰å¿…è¦ï¼Œå¦‚æœå®¢æˆ·ç«¯æ”¶ä¸åˆ°åé¦ˆï¼Œ
+	    // å®ƒéœ€è¦å†å‘ä¸€æ¬¡ï¼Œå¦åˆ™çš„è¯ï¼Œéš¾é“ç¥¨æ± åœ¨æ¢å¤æ—¶è¿˜è¦éå†å¤‡ä»½
+	    // å†é‡å‘å“åº”ï¼Ÿ
 	    ChannelFuture future = event.channel.write(trains);	    
 	    future.addListener(ChannelFutureListener.CLOSE);
 	     */
 	}
     };
     
-    // Ä¬ÈÏµÄÇëÇóÏûÏ¢ºÍÏìÓ¦ÏûÏ¢¶ÓÁĞµÄ´óĞ¡ÊÇ2µÄ13´Î·½
+    // é»˜è®¤çš„è¯·æ±‚æ¶ˆæ¯å’Œå“åº”æ¶ˆæ¯é˜Ÿåˆ—çš„å¤§å°æ˜¯2çš„13æ¬¡æ–¹
     private static int RING_SIZE = 2 << 13;
     private static final ExecutorService EXECUTOR = 
 	Executors.newCachedThreadPool();
 
-    // ÏòÏûÏ¢¶ÓÁĞ·¢²¼Ò»¸ö²éÑ¯ÇëÇóÊÂ¼ş
-    // TODO: ½«publicXXXEvent¸Ä³ÉÒì²½µÄ£¬Ó¦¸Ã·µ»ØvoidÀàĞÍ£¬Òì²½·µ»Ø²éÑ¯½á¹û¡£
+    // å‘æ¶ˆæ¯é˜Ÿåˆ—å‘å¸ƒä¸€ä¸ªæŸ¥è¯¢è¯·æ±‚äº‹ä»¶
+    // TODO: å°†publicXXXEventæ”¹æˆå¼‚æ­¥çš„ï¼Œåº”è¯¥è¿”å›voidç±»å‹ï¼Œå¼‚æ­¥è¿”å›æŸ¥è¯¢ç»“æœã€‚
     public static void publishQueryEvent(TicketQueryArgs args) {
 	long sequence = _ringBuffer.next();
 	TicketQueryArgs event = _ringBuffer.get(sequence);
@@ -101,7 +101,7 @@ public class EventBus {
 	// event.sequence = sequence;
 	event.setSequence(sequence);
 
-	// ½«ÏûÏ¢·Åµ½³µÂÖ¶ÓÁĞÀï£¬ÒÔ±ã´¦Àí
+	// å°†æ¶ˆæ¯æ”¾åˆ°è½¦è½®é˜Ÿåˆ—é‡Œï¼Œä»¥ä¾¿å¤„ç†
 	_ringBuffer.publish(sequence);
     }
 
@@ -109,28 +109,28 @@ public class EventBus {
 	 _poolManger = ServiceManager.getServices().getRequiredService(
 	      ITicketPoolManager.class);
 
-	 // ÔÚdisruptorÆô¶¯Ö®Ç°´ò¿ªÈÕÖ¾
+	 // åœ¨disruptorå¯åŠ¨ä¹‹å‰æ‰“å¼€æ—¥å¿—
 	 openJournal();
 	 startDisruptor();
     }
     
     public static void shutdown() throws Exception {
-	// ÏÈ¹Ø±Õµôdisruptor£¬ÔÙ¹Ø±ÕÈÕÖ¾ÎÄ¼ş
-	// ÒÔÃâ³öÏÖÈÕÖ¾Ïß³ÌºÍdisruptor¹Ø±ÕÍ¬Ê±ÔËĞĞµÄÇé¿ö
+	// å…ˆå…³é—­æ‰disruptorï¼Œå†å…³é—­æ—¥å¿—æ–‡ä»¶
+	// ä»¥å…å‡ºç°æ—¥å¿—çº¿ç¨‹å’Œdisruptorå…³é—­åŒæ—¶è¿è¡Œçš„æƒ…å†µ
 	_disruptor.shutdown();
 	// _disruptorRes.shutdown();
 	_journal.close();
     }
 
     private static void openJournal() throws Exception {
-	// Ó¦¸ÃÊÇÖ»Ôö´ò¿ª
+	// åº”è¯¥æ˜¯åªå¢æ‰“å¼€
 	FileOutputStream fos = 
 	    new FileOutputStream("eventbus.journal");
 	_journal = new ObjectOutputStream(fos);
     }
     
     private static void startDisruptor() {       
-	// ´´½¨´¦Àí²éÑ¯ÏûÏ¢µÄdisruptor
+	// åˆ›å»ºå¤„ç†æŸ¥è¯¢æ¶ˆæ¯çš„disruptor
 	_disruptor = 
 	    new Disruptor<TicketQueryArgs>
 	    (
@@ -141,15 +141,15 @@ public class EventBus {
 	     );
 
 	// @brucesea
-	// ÁíÍâÓÃDisruptor£¬ÍÆ¼öÓÃDisruptorWizard£¬
-	// ÕâÑùEventProcessorÖ®¼äµÄ¹ØÏµ»á±È½ÏÇåÎú
+	// å¦å¤–ç”¨Disruptorï¼Œæ¨èç”¨DisruptorWizardï¼Œ
+	// è¿™æ ·EventProcessorä¹‹é—´çš„å…³ç³»ä¼šæ¯”è¾ƒæ¸…æ™°
 	_disruptor
-	     // ×¢²áÈÕÖ¾ºÍ±¸·İÏß³Ì
+	     // æ³¨å†Œæ—¥å¿—å’Œå¤‡ä»½çº¿ç¨‹
 	     .handleEventsWith(_journalist, _replicator)
-	     // ÊÂ¼ş´¦ÀíÏß³ÌÖ»ÄÜÔÚÈÕÖ¾ºÍ±¸·İÏß³ÌÖ®ºó´¦ÀíËü
+	     // äº‹ä»¶å¤„ç†çº¿ç¨‹åªèƒ½åœ¨æ—¥å¿—å’Œå¤‡ä»½çº¿ç¨‹ä¹‹åå¤„ç†å®ƒ
 	     .then(_eventProcessor);
 
-	// Æô¶¯disruptor,µÈ´ıpublishÊÂ¼ş
+	// å¯åŠ¨disruptor,ç­‰å¾…publishäº‹ä»¶
 	_ringBuffer = _disruptor.start();
     }
 }

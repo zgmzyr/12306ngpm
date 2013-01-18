@@ -30,8 +30,8 @@ import org.ng12306.tpms.runtime.TestRailwayRepository;
 import org.ng12306.tpms.runtime.TestTicketPoolManager;
 import org.ng12306.tpms.runtime.ServiceManager;
 
-// ITpServerµÄÄ¬ÈÏÊµÏÖ£¬Èç¹ûÒª×öA/B²âÊÔµÄ»°£¬Ó¦¸ÃÊÇ
-// ´ÓTpServer¼Ì³ĞÊµÏÖÁ½ÖÖ·½Ê½
+// ITpServerçš„é»˜è®¤å®ç°ï¼Œå¦‚æœè¦åšA/Bæµ‹è¯•çš„è¯ï¼Œåº”è¯¥æ˜¯
+// ä»TpServerç»§æ‰¿å®ç°ä¸¤ç§æ–¹å¼
 public class TpServer implements ITpServer {
      private int _port;
      private ChannelGroup _channels;
@@ -44,15 +44,15 @@ public class TpServer implements ITpServer {
      }
      
      public void start() {
-	  // ÏÂÃæµÄ´úÂë¶¼ÊÇ¿ÉÒÔÖ±½ÓÔÚNettyµÄ¹ÙÍøÀï¿´µ½µÄ£¬²»×ĞÏ¸×¢ÊÍ
+	  // ä¸‹é¢çš„ä»£ç éƒ½æ˜¯å¯ä»¥ç›´æ¥åœ¨Nettyçš„å®˜ç½‘é‡Œçœ‹åˆ°çš„ï¼Œä¸ä»”ç»†æ³¨é‡Š
 	  _factory = new NioServerSocketChannelFactory(
-	       // TODO: ĞèÒªĞ´ĞÔÄÜ²âÊÔÓÃÀıÒÑÑéÖ¤cached thread poolÊÇ·ñ¹»ÓÃ£¿
+	       // TODO: éœ€è¦å†™æ€§èƒ½æµ‹è¯•ç”¨ä¾‹å·²éªŒè¯cached thread poolæ˜¯å¦å¤Ÿç”¨ï¼Ÿ
 	       Executors.newCachedThreadPool(),
 	       Executors.newCachedThreadPool());
 	  ServerBootstrap bootstrap = new ServerBootstrap(_factory);
 	  bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 		    public ChannelPipeline getPipeline() throws Exception {
-			 // Õâ¸ö¾ÍÊÇ·¢ËÍÏûÏ¢°üµÄHandlerÕ» - ËäÈ»Ãû×Ö½Ğ¹ÜµÀ£¡
+			 // è¿™ä¸ªå°±æ˜¯å‘é€æ¶ˆæ¯åŒ…çš„Handleræ ˆ - è™½ç„¶åå­—å«ç®¡é“ï¼
 			 return Channels.pipeline(
 			      new ObjectEncoder(),
 			      new ObjectDecoder(
@@ -63,8 +63,8 @@ public class TpServer implements ITpServer {
 	       });
 	  _channels.add(bootstrap.bind(new InetSocketAddress(_port)));
 	  try { 
-	       // Èç¹ûeventbusÒòÎªÈÕÖ¾\»òÕßÁªÏµ²»ÉÏ±¸·İ·şÎñÆ÷¶øÎŞ·¨Æô¶¯
-	       // ÄÇÃ´¾Í¹Ø±ÕNetty·şÎñÆ÷
+	       // å¦‚æœeventbuså› ä¸ºæ—¥å¿—\æˆ–è€…è”ç³»ä¸ä¸Šå¤‡ä»½æœåŠ¡å™¨è€Œæ— æ³•å¯åŠ¨
+	       // é‚£ä¹ˆå°±å…³é—­NettyæœåŠ¡å™¨
 	       EventBus.start();
 	       registerService();
 	       _started = true;	       
@@ -76,18 +76,18 @@ public class TpServer implements ITpServer {
      public void stop() {
 	  if ( _started ) {
 	       try { 
-		    // EventBusÈç¹ûÃ»ÓĞÕı³£¹Ø±Õ,´ò¸öÈÕÖ¾ºÃÁË
+		    // EventBuså¦‚æœæ²¡æœ‰æ­£å¸¸å…³é—­,æ‰“ä¸ªæ—¥å¿—å¥½äº†
 		    EventBus.shutdown();
 	       } catch ( Exception e ) {
-		    // TODO: ¼ÇÂ¼EventBusÎŞ·¨Õı³£¹Ø±ÕµÄÈÕÖ¾
+		    // TODO: è®°å½•EventBusæ— æ³•æ­£å¸¸å…³é—­çš„æ—¥å¿—
 	       }
 
 	       stopNettyServer();
 	  }
      }
 
-     // ¸ù¾İ³æ×ÓµÄ´úÂë,ËùÓĞµÄ·şÎñ¶¼ĞèÒªÔ¤ÏÈ×¢²á,È»ºóÔÙÊ¹ÓÃÊ±,Í¨¹ıgetRequiredService
-     // »ñÈ¡,ÀàËÆIoc,Òò´Ë·şÎñÆ÷ÔÚÆô¶¯Ê±,ĞèÒª×¢²áÕâĞ©·şÎñ
+     // æ ¹æ®è™«å­çš„ä»£ç ,æ‰€æœ‰çš„æœåŠ¡éƒ½éœ€è¦é¢„å…ˆæ³¨å†Œ,ç„¶åå†ä½¿ç”¨æ—¶,é€šè¿‡getRequiredService
+     // è·å–,ç±»ä¼¼Ioc,å› æ­¤æœåŠ¡å™¨åœ¨å¯åŠ¨æ—¶,éœ€è¦æ³¨å†Œè¿™äº›æœåŠ¡
      private void registerService() throws Exception {
 	  ServiceManager
 	       .getServices()
@@ -107,17 +107,17 @@ public class TpServer implements ITpServer {
 	  @Override
 	  public void messageReceived(ChannelHandlerContext ctx,
 				      MessageEvent e) {
-	       // Æ±³Ø·şÎñÆ÷²ÉÓÃÒì²½ÍøÂçioµÄ·½Ê½½ÓÊÜÏûÏ¢
-	       // ÒòÎªÎÒÃÇµÄHandlerÊÇ´ÓSimpleChannelUpstreamHandler¼Ì³ĞÏÂÀ´µÄ
-	       // Netty»á°ïÎÒÃÇ½«¶à¸öÁãÉ¢µÄÊı¾İ°üÕûºÏÒ»¸öÍêÕûµÄÔ­Ê¼µÄ¿Í»§¶ËÇëÇóÊı¾İ°ü
-	       // ÁíÍâ£¬ÓÉÓÚÔÚÆäÖ®Ç°ÎÒÃÇÒÑ¾­·ÅÖÃÁËĞòÀû»¯·½ÃæµÄHandlerÁË£¬ËùÒÔ¿ÉÒÔ
-	       // Ö±½ÓÍ¨¹ıe.getMessage()»ñÈ¡¿Í»§¶Ë·¢ËÍµÄ¶ÔÏó¡£
+	       // ç¥¨æ± æœåŠ¡å™¨é‡‡ç”¨å¼‚æ­¥ç½‘ç»œioçš„æ–¹å¼æ¥å—æ¶ˆæ¯
+	       // å› ä¸ºæˆ‘ä»¬çš„Handleræ˜¯ä»SimpleChannelUpstreamHandlerç»§æ‰¿ä¸‹æ¥çš„
+	       // Nettyä¼šå¸®æˆ‘ä»¬å°†å¤šä¸ªé›¶æ•£çš„æ•°æ®åŒ…æ•´åˆä¸€ä¸ªå®Œæ•´çš„åŸå§‹çš„å®¢æˆ·ç«¯è¯·æ±‚æ•°æ®åŒ…
+	       // å¦å¤–ï¼Œç”±äºåœ¨å…¶ä¹‹å‰æˆ‘ä»¬å·²ç»æ”¾ç½®äº†åºåˆ©åŒ–æ–¹é¢çš„Handleräº†ï¼Œæ‰€ä»¥å¯ä»¥
+	       // ç›´æ¥é€šè¿‡e.getMessage()è·å–å®¢æˆ·ç«¯å‘é€çš„å¯¹è±¡ã€‚
 	       TicketQueryArgs event = (TicketQueryArgs)e.getMessage();
-	       // ´«µİ¸ødisruptor³µÂÖ¶ÓÁĞ½øĞĞ´¦Àí¡£
+	       // ä¼ é€’ç»™disruptorè½¦è½®é˜Ÿåˆ—è¿›è¡Œå¤„ç†ã€‚
 	       Channel channel = e.getChannel();
 	       EventBus.publishQueryEvent(event);       
 	  }
 
-	  // TODO: ĞèÒª¶¨ÒåºÍÊµÏÖ·¢ÉúÒì³£µÄÈÕÖ¾·½Ê½
+	  // TODO: éœ€è¦å®šä¹‰å’Œå®ç°å‘ç”Ÿå¼‚å¸¸çš„æ—¥å¿—æ–¹å¼
      }
 }
