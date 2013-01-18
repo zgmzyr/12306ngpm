@@ -90,6 +90,7 @@ public class NettyIntegrationTest {
 	       
 	       // 并验证
 	       Train[] results = handler.getResponse();
+	       assertNotNull(results);
 	       Train result = results[0];
 	       
 	       assertEquals("G101", result.name);
@@ -112,7 +113,8 @@ public class NettyIntegrationTest {
      
      // 这个仅仅是测试用的服务器 - 用来试验Netty API的
      private TestNettyServer _server;
-     private void startTestServer() throws Exception {
+     private void startTestServer() throws Exception {	 
+	  registerService();
 	  EventBus.start();
 	  _server = new TestNettyServer(TP_SERVER_PORT,
 					new TestQueryTrainServerHandler());
@@ -124,6 +126,16 @@ public class NettyIntegrationTest {
 	       EventBus.shutdown();
 	       _server.stop();
 	  }
+     }
+
+     // 根据虫子的代码,所有的服务都需要预先注册,然后再使用时,通过getRequiredService
+     // 获取,类似Ioc,因此服务器在启动时,需要注册这些服务
+     private void registerService() throws Exception {
+	  ServiceManager
+	       .getServices()
+	       .initializeServices(new Object[] {
+			 new TestRailwayRepository(), 
+			 new TestTicketPoolManager()});
      }
 
      @Test

@@ -33,7 +33,12 @@ public class EventBus {
 	       // 因为在硬盘上有一个缓冲区，需要确保即使程序崩溃也能把缓冲里的数据
 	       // 写到硬盘上，不过貌似现代操作系统能够做到在程序崩溃时flush缓存，这点
 	       // 需要测试验证。
-	       _journal.writeObject(event);
+
+	       // brucesea的反馈: 查询不改变状态，Journalist和Replicator感觉就用不着了，
+	       // 对改变状态的操作Journalist和Replicator一下
+	       // 因此需要根据TicketQueryArgs的类型来决定是否做日志和备份
+	       
+	       // _journal.writeObject(event);
 	  }
      };
      
@@ -134,16 +139,17 @@ public class EventBus {
 	     new SingleThreadedClaimStrategy(RING_SIZE),
 	     new BlockingWaitStrategy()
 	     );
-	// 注册日志和备份线程
-	_disruptor.handleEventsWith(_journalist);
-	_disruptor.handleEventsWith(_replicator);
 
-	// 事件处理线程只能在日志和备份线程之后处理它
-	_ringBuffer = _disruptor.getRingBuffer();
-	SequenceBarrier barrier = _ringBuffer.newBarrier();
-	_disruptor.handleEventsWith(_eventProcessor);
+	// @brucesea
+	// 另外用Disruptor，推荐用DisruptorWizard，
+	// 这样EventProcessor之间的关系会比较清晰
+	_disruptor
+	     // 注册日志和备份线程
+	     .handleEventsWith(_journalist, _replicator)
+	     // 事件处理线程只能在日志和备份线程之后处理它
+	     .then(_eventProcessor);
 
 	// 启动disruptor,等待publish事件
-	_disruptor.start();
+	_ringBuffer = _disruptor.start();
     }
 }

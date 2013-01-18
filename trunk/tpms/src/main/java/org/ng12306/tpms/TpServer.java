@@ -26,6 +26,9 @@ import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 
 import org.ng12306.tpms.runtime.TicketQueryArgs;
+import org.ng12306.tpms.runtime.TestRailwayRepository;
+import org.ng12306.tpms.runtime.TestTicketPoolManager;
+import org.ng12306.tpms.runtime.ServiceManager;
 
 // ITpServer的默认实现，如果要做A/B测试的话，应该是
 // 从TpServer继承实现两种方式
@@ -63,7 +66,8 @@ public class TpServer implements ITpServer {
 	       // 如果eventbus因为日志\或者联系不上备份服务器而无法启动
 	       // 那么就关闭Netty服务器
 	       EventBus.start();
-	       _started = true;
+	       registerService();
+	       _started = true;	       
 	  } catch ( Exception e ) {
 	       stopNettyServer();
 	  }
@@ -80,6 +84,16 @@ public class TpServer implements ITpServer {
 
 	       stopNettyServer();
 	  }
+     }
+
+     // 根据虫子的代码,所有的服务都需要预先注册,然后再使用时,通过getRequiredService
+     // 获取,类似Ioc,因此服务器在启动时,需要注册这些服务
+     private void registerService() throws Exception {
+	  ServiceManager
+	       .getServices()
+	       .initializeServices(new Object[] {
+			 new TestRailwayRepository(), 
+			 new TestTicketPoolManager()});
      }
 
      private void stopNettyServer()  {
