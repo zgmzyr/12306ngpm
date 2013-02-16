@@ -50,7 +50,11 @@ public class NettyIntegrationTest {
 	       _event = new TicketQueryArgs();
 	       _event.setAction(TicketQueryAction.Query);
 	       _event.setTrainNumber(trainId);
-	       _event.setDate(LocalDate.now());
+	       _event.setDate(new LocalDate().plusDays(1));
+	       _event.setDepartureStation("北京南");
+	       _event.setDestinationStation("南京南");
+	       _event.setSeatType(-1);
+	       _event.setCount(1);
 	  }
 	  
 	  @Override
@@ -138,7 +142,6 @@ public class NettyIntegrationTest {
 	  bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 		    public ChannelPipeline getPipeline() 
 			 throws Exception {
-			 // 查询G101
 			 return Channels.pipeline(
 			      // 使用自定义的bson格式序列化
 			      new ObjectBsonEncoder(),

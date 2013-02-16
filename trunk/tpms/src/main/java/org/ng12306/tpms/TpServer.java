@@ -119,11 +119,11 @@ public class TpServer implements ITpServer {
 		    }
 	       });
 
-	  LocalDate today = LocalDate.now();
+	  LocalDate tomorrow = new LocalDate().plusDays(1);
 	  
 	  Train train = new Train();
 	  train.setId(UUID.randomUUID());
-	  train.setDepartureDate(today);
+	  train.setDepartureDate(tomorrow);
 	  train.setTrainNumber(tn);
 	  
 	  TestTicketPool pool = new TestTicketPool(train);
