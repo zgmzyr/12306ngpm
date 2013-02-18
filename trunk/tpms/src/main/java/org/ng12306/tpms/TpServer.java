@@ -74,7 +74,6 @@ public class TpServer implements ITpServer {
 	       // 如果eventbus因为日志\或者联系不上备份服务器而无法启动
 	       // 那么就关闭Netty服务器
 	       registerService();
-	       createTicketPools();
 	       EventBus.start();
 	       _started = true;	       
 	  } catch ( Exception e ) {	       
@@ -106,29 +105,6 @@ public class TpServer implements ITpServer {
 	       .initializeServices(new Object[] {
 			 new TestRailwayRepository(), 
 			 new TestTicketPoolManager()});
-     }
-
-     private void createTicketPools() throws Exception {
-	  IRailwayRepository repo = ServiceManager.getServices()
-	       .getRequiredService(IRailwayRepository.class);
-	  TrainNumber tn = Queries.query(repo.getTrainNumbers()).first(
-	       new Predicate<TrainNumber>() {		    
-		    @Override
-		    public boolean evaluate(TrainNumber obj) throws Exception {
-			 return obj.getName().equals("G101");
-		    }
-	       });
-
-	  LocalDate tomorrow = new LocalDate().plusDays(1);
-	  
-	  Train train = new Train();
-	  train.setId(UUID.randomUUID());
-	  train.setDepartureDate(tomorrow);
-	  train.setTrainNumber(tn);
-	  
-	  TestTicketPool pool = new TestTicketPool(train);
-	  pool.setSite(ServiceManager.getServices());
-	  pool.initialize();	 
      }
 
      private void stopNettyServer()  {
