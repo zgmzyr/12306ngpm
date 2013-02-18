@@ -3,6 +3,9 @@
 
 我要回家过年
 
+### 新人上手
+https://github.com/12306NgPM/12306ngpm/wiki/%E6%96%B0%E4%BA%BA%E4%B8%8A%E6%89%8B
+
 ### 使用说明
 1. 下载并安装Virtual Box 4.2: https://www.virtualbox.org/wiki/Downloads
 2. 下载并安装Vagrant: http://vagrantup.com/
@@ -30,45 +33,8 @@
 8. 顺利的话,你应该可以看到BUILD SUCCESS的字样,如有任何问题,欢迎到下面的链接上报BUG:
    http://bugzilla.12306ng.org/
    
-9. 在宿主机(例如Windows系统上),使用浏览器访问以下地址并能看到一堆json输出的话，恭喜你，环境同步好了：
-   http://localhost:12306/ticket/id/1   
-   
-9. 要访问票池原型的话，请在宿主机上(例如Windows系统上),使用浏览器打开 <12306ngpm根目录>\trunk\web\index.htm。你应该可以试验简单的按车次查询和买票。
-   
-10. 如果需要执行测试用例的话,请执行
+9. 如果需要执行测试用例的话,请执行
    
    cd /vagrant/trunk/tpms
 
    mvn test
-   
-
-English
-=======
-### Getting Start
-1. Download and install latest virtual box: https://www.virtualbox.org/wiki/Downloads
-2. Download and install vagrant: http://vagrantup.com/
-3. If you are run this project for the first time, change you cmd(Windows) or shell(Linux/Mac) to the root directory of this project, and run (this will create a virtual machine and setup the dev environment for you automatically):
-   
-   vagrant box add base http://files.vagrantup.com/lucid32.box
-
-   vagrant up
-
-4. next time, you just cd to the root directory of this project, and run:
-   
-   vagrant up
-
-5. For Windows platform, please login to the virtual machine by putty, below are putty settings:
-   Host name - 127.0.0.1:2222
-   User name/Password - vagrant/vagrant
-
-6. For Non Windows platform, run:
-   
-   vagrant ssh
-   
-7. Now you should log on the virtual machine shell, build the project source on the virtual machine by run following:
-   
-   cd /vagrant
-
-
-
-   
