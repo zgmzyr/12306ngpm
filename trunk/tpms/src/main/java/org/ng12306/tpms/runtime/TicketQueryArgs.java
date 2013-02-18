@@ -1,9 +1,27 @@
 package org.ng12306.tpms.runtime;
 
+import java.io.Serializable;
+
 import org.joda.time.LocalDate;
+import org.jboss.netty.channel.Channel;
 
-public class TicketQueryArgs {
+public class TicketQueryArgs implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7163070002185653449L;
+	
+	private long _sequence;
+
+	public long getSequence() {
+		return this._sequence;
+	}
+
+	public void setSequence(long value) {
+		this._sequence = value;
+	}
+	
 	private String _trainNumber;
 
 	public String getTrainNumber() {
@@ -65,7 +83,32 @@ public class TicketQueryArgs {
 		this._count = value;
 	}
 
-	
+    // 在做序列化的时候,可以忽略这个属性
+    // 因为我们没有必要把客户端与服务器的连接也备份下来.
+    public transient Channel channel;
+
+	private TicketQueryAction _action;
+
+	public TicketQueryAction getAction() {
+		return this._action;
+	}
+
+	public void setAction(TicketQueryAction value) {
+		this._action = value;
+	}
+
+	public void copyTo(TicketQueryArgs other)
+	{
+		other._action = this._action;
+		other._count = this._count;
+		other._date = this._date;
+		other._departureStation = this._departureStation;
+		other._destinationStation = this._destinationStation;
+		other._seatType = this._seatType;
+		other._sequence = this._sequence;
+		other._trainNumber = this._trainNumber;
+		other.channel = this.channel;
+	}
 	
 	
 }

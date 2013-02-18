@@ -6,157 +6,134 @@ import com.lmax.disruptor.dsl.*;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 import org.joda.time.DateTime;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+
+import org.ng12306.tpms.runtime.ServiceManager;
+import org.ng12306.tpms.runtime.TicketQueryArgs;
+import org.ng12306.tpms.runtime.TicketQueryResult;
+import org.ng12306.tpms.runtime.TicketQueryAction;
+import org.ng12306.tpms.runtime.TicketPoolQueryArgs;
+import org.ng12306.tpms.runtime.ITicketPoolManager;
+import org.ng12306.tpms.runtime.ITicketPool;
 
 public class EventBus {
-    private static ObjectOutputStream _journal;
-    private static RingBuffer<TicketQueryEvent> _ringBuffer;
-    private static RingBuffer<TicketQueryResultEvent> _outRingBuffer;
-    private static Disruptor<TicketQueryEvent> _disruptor;
-    private static Disruptor<TicketQueryResultEvent> _disruptorRes;
-    
-    // ÈÕÖ¾Ïß³Ì
-    static final EventHandler<TicketQueryEvent> _journalist = 
-	new EventHandler<TicketQueryEvent>() {
-	public void onEvent(final TicketQueryEvent event, 
+     private static ObjectOutputStream _journal;
+     private static RingBuffer<TicketQueryArgs> _ringBuffer;
+     private static Disruptor<TicketQueryArgs> _disruptor;
+     private static ITicketPoolManager _poolManger;
+     
+     // æ—¥å¿—çº¿ç¨‹
+     static final EventHandler<TicketQueryArgs> _journalist = 
+	  new EventHandler<TicketQueryArgs>() {
+	  public void onEvent(final TicketQueryArgs event, 
+			      final long sequence,
+			      final boolean endOfBatch) throws Exception {
+	       // TODO: éœ€è¦ç¡®ä¿ç¨‹åºå´©æºƒçš„æ—¶å€™ï¼Œæ‰€æœ‰çš„æ•°æ®éƒ½åœ¨ç¡¬ç›˜ä¸Š
+	       // å› ä¸ºåœ¨ç¡¬ç›˜ä¸Šæœ‰ä¸€ä¸ªç¼“å†²åŒºï¼Œéœ€è¦ç¡®ä¿å³ä½¿ç¨‹åºå´©æºƒä¹Ÿèƒ½æŠŠç¼“å†²é‡Œçš„æ•°æ®
+	       // å†™åˆ°ç¡¬ç›˜ä¸Šï¼Œä¸è¿‡è²Œä¼¼ç°ä»£æ“ä½œç³»ç»Ÿèƒ½å¤Ÿåšåˆ°åœ¨ç¨‹åºå´©æºƒæ—¶flushç¼“å­˜ï¼Œè¿™ç‚¹
+	       // éœ€è¦æµ‹è¯•éªŒè¯ã€‚
+
+	       // bruceseaçš„åé¦ˆ: æŸ¥è¯¢ä¸æ”¹å˜çŠ¶æ€ï¼ŒJournalistå’ŒReplicatoræ„Ÿè§‰å°±ç”¨ä¸ç€äº†ï¼Œ
+	       // å¯¹æ”¹å˜çŠ¶æ€çš„æ“ä½œJournalistå’ŒReplicatorä¸€ä¸‹
+	       // å› æ­¤éœ€è¦æ ¹æ®TicketQueryArgsçš„ç±»å‹æ¥å†³å®šæ˜¯å¦åšæ—¥å¿—å’Œå¤‡ä»½
+	  }
+     };
+     
+     // å°†äº‹ä»¶å‘é€åˆ°å¤‡ä»½æœåŠ¡å™¨ä¿å­˜çš„å¤‡ä»½çº¿ç¨‹
+     static final EventHandler<TicketQueryArgs> _replicator = new EventHandler<TicketQueryArgs>() {
+	  public void onEvent(final TicketQueryArgs event, final long sequence,
+			      final boolean endOfBatch) throws Exception {
+	       // TODO: åæœŸå†å®ç°å¤‡ä»½çº¿ç¨‹çš„é€»è¾‘
+	  }
+     };
+
+    static final EventHandler<TicketQueryArgs> _eventProcessor = 
+	new EventHandler<TicketQueryArgs>() {
+	public void onEvent(final TicketQueryArgs event,
 			    final long sequence,
 			    final boolean endOfBatch) throws Exception {
-	    // TODO: ĞèÒªÈ·±£³ÌĞò±ÀÀ£µÄÊ±ºò£¬ËùÓĞµÄÊı¾İ¶¼ÔÚÓ²ÅÌÉÏ
-	    // ÒòÎªÔÚÓ²ÅÌÉÏÓĞÒ»¸ö»º³åÇø£¬ĞèÒªÈ·±£¼´Ê¹³ÌĞò±ÀÀ£Ò²ÄÜ°Ñ»º³åÀïµÄÊı¾İ
-	    // Ğ´µ½Ó²ÅÌÉÏ£¬²»¹ıÃ²ËÆÏÖ´ú²Ù×÷ÏµÍ³ÄÜ¹»×öµ½ÔÚ³ÌĞò±ÀÀ£Ê±flush»º´æ£¬Õâµã
-	    // ĞèÒª²âÊÔÑéÖ¤¡£
-	    _journal.writeObject(event);
-	}
-    };
-
-    // ½«ÊÂ¼ş·¢ËÍµ½±¸·İ·şÎñÆ÷±£´æµÄ±¸·İÏß³Ì
-    static final EventHandler<TicketQueryEvent> _replicator = 
-	new EventHandler<TicketQueryEvent>() {
-	public void onEvent(final TicketQueryEvent event,
-			    final long sequence,
-			    final boolean endOfBatch) throws Exception {
-	    // TODO: ºóÆÚÔÙÊµÏÖ±¸·İÏß³ÌµÄÂß¼­
-	}
-    };
-
-    static final EventHandler<TicketQueryEvent> _eventProcessor = 
-	new EventHandler<TicketQueryEvent>() {
-	public void onEvent(final TicketQueryEvent event,
-			    final long sequence,
-			    final boolean endOfBatch) throws Exception {
-	    // ¸ù¾İ³µ´ÎºÅ²éÑ¯³µ´ÎÏêÏ¸ĞÅÏ¢
-	    Train train = TicketRepository.queryTrain(event.trainId,
-						      event.startDate,
-						      event.endDate);
-
-	    // ²»¹ÜÕÒµ½Óë·ñ£¬¶¼»áÓĞÒ»¸öÏìÓ¦
-	    long s = _outRingBuffer.next();
-	    TicketQueryResultEvent e = _outRingBuffer.get(s);	    
-	    // ½«ÏìÓ¦ÏûÏ¢ºÍÇëÇóÏûÏ¢¹ØÁªÆğÀ´£¬ÒòÎªµ÷ÓÃÕßÒ²ÓĞ¿ÉÄÜÊÇÒì²½´¦ÀíµÄ
-	    e.sequence = event.sequence;
-
-	    // ÕÒµ½ÁËµÄ»°£¬¾ÍÏòÏìÓ¦ÏûÏ¢¶ÓÁĞÀï·ÅÈëÒ»¸ö³µ´ÎÏêÏ¸ĞÅÏ¢Êı×é
-	    if ( train != null ) {	       
-		e.trains = new Train[1];
-		e.trains[0] = train;
-	    } else {
-		// ²»ÄÜÉèÖÃÎªnull£¬·ñÔòÇ°Ì¨jerseyµÈrestful·şÎñ
-		// ÔÚĞòÁĞ»¯½á¹ûµÄÊ±ºò¿ÉÄÜ»á³ö´í£¬Òò´ËÄşÔ¸·µ»ØÒ»¸ö¿ÕÊı×é¡£
-		e.trains = new Train[0];
-	    }
-
-	    _outRingBuffer.publish(s);
+	     // æ ¹æ®è½¦æ¬¡å·æŸ¥è¯¢è½¦æ¬¡è¯¦ç»†ä¿¡æ¯	       
+	     ITicketPool pool = EventBus._poolManger.getPool(event);
+	     TicketQueryResult result = new TicketQueryResult();
+	     
+	     // TODO: è¿™æ®µä»£ç å°šæœ‰äº‰è®®ï¼Œå› ä¸ºæŸ¥è¯¢è½¦ç¥¨åº”è¯¥è¿”å›æœ‰ç¥¨çš„è½¦æ¬¡åˆ—è¡¨ã€‚
+	     if (pool != null) {
+		  TicketPoolQueryArgs poolArgs = pool
+		       .toTicketPoolQueryArgs(event);
+		  if (event.getAction() == TicketQueryAction.Query) {
+		      result.setHasTicket(pool.hasTickets(poolArgs));
+		  }
+	     }
+	     
+	     // æ— è®ºä»€ä¹ˆæ ·çš„ç»“æœ,éƒ½éœ€è¦å‘å®¢æˆ·ç«¯å‘é€ä¸€ä¸ªå“åº”.
+	     ChannelFuture future = event.channel.write(result);	    
+	     future.addListener(ChannelFutureListener.CLOSE);
 	}
     };
     
-    // Ä¬ÈÏµÄÇëÇóÏûÏ¢ºÍÏìÓ¦ÏûÏ¢¶ÓÁĞµÄ´óĞ¡ÊÇ2µÄ13´Î·½
+    // é»˜è®¤çš„è¯·æ±‚æ¶ˆæ¯å’Œå“åº”æ¶ˆæ¯é˜Ÿåˆ—çš„å¤§å°æ˜¯2çš„13æ¬¡æ–¹
     private static int RING_SIZE = 2 << 13;
     private static final ExecutorService EXECUTOR = 
 	Executors.newCachedThreadPool();
 
-    // ÏòÏûÏ¢¶ÓÁĞ·¢²¼Ò»¸ö²éÑ¯ÇëÇóÊÂ¼ş
-    // TODO: ½«publicXXXEvent¸Ä³ÉÒì²½µÄ£¬Ó¦¸Ã·µ»ØvoidÀàĞÍ£¬Òì²½·µ»Ø²éÑ¯½á¹û¡£
-    public static Train[] publishQueryEvent(String trainId,
-					    DateTime startDate,
-					    DateTime endDate) {
+    // å‘æ¶ˆæ¯é˜Ÿåˆ—å‘å¸ƒä¸€ä¸ªæŸ¥è¯¢è¯·æ±‚äº‹ä»¶
+    // TODO: å°†publicXXXEventæ”¹æˆå¼‚æ­¥çš„ï¼Œåº”è¯¥è¿”å›voidç±»å‹ï¼Œå¼‚æ­¥è¿”å›æŸ¥è¯¢ç»“æœã€‚
+    public static void publishQueryEvent(TicketQueryArgs args) {
 	long sequence = _ringBuffer.next();
-	TicketQueryEvent event = _ringBuffer.get(sequence);
-	event.sequence = sequence;
-	event.trainId = trainId;
-	event.startDate = startDate;
-	event.endDate = endDate;
-	_ringBuffer.publish(sequence);
+	TicketQueryArgs event = _ringBuffer.get(sequence);
+	args.copyTo(event);
+	event.setSequence(sequence);
 
-	// ´úÂëÓ¦¸Ãµ½´ËÎªÖ¹£¬²»¹ıÎÒ»¹²»ÖªµÀÈçºÎĞŞ¸Äjersey£¬Ê¹Æä
-	// ·µ»ØÒì²½ÏòÀ´Ô´restful·şÎñµ÷ÓÃÕß·µ»Ø½á¹û£¬Òò´ËÖ»ºÃ
-	// ÓÃÏÂÃæÍ¬²½µÄ·½Ê½
-	return waitForResponse(sequence).trains;
+	// å°†æ¶ˆæ¯æ”¾åˆ°è½¦è½®é˜Ÿåˆ—é‡Œï¼Œä»¥ä¾¿å¤„ç†
+	_ringBuffer.publish(sequence);
     }
 
     public static void start() throws Exception {
-	// ÔÚdisruptorÆô¶¯Ö®Ç°´ò¿ªÈÕÖ¾
-	openJournal();
-	startDisruptor();
+	 _poolManger = ServiceManager.getServices().getRequiredService(
+	      ITicketPoolManager.class);
+
+	 // åœ¨disruptorå¯åŠ¨ä¹‹å‰æ‰“å¼€æ—¥å¿—
+	 openJournal();
+	 startDisruptor();
     }
     
     public static void shutdown() throws Exception {
-	// ÏÈ¹Ø±Õµôdisruptor£¬ÔÙ¹Ø±ÕÈÕÖ¾ÎÄ¼ş
-	// ÒÔÃâ³öÏÖÈÕÖ¾Ïß³ÌºÍdisruptor¹Ø±ÕÍ¬Ê±ÔËĞĞµÄÇé¿ö
+	// å…ˆå…³é—­æ‰disruptorï¼Œå†å…³é—­æ—¥å¿—æ–‡ä»¶
+	// ä»¥å…å‡ºç°æ—¥å¿—çº¿ç¨‹å’Œdisruptorå…³é—­åŒæ—¶è¿è¡Œçš„æƒ…å†µ
 	_disruptor.shutdown();
-	_disruptorRes.shutdown();
 	_journal.close();
     }
 
     private static void openJournal() throws Exception {
-	// Ó¦¸ÃÊÇÖ»Ôö´ò¿ª
+	// åº”è¯¥æ˜¯åªå¢æ‰“å¼€
 	FileOutputStream fos = 
 	    new FileOutputStream("eventbus.journal");
 	_journal = new ObjectOutputStream(fos);
     }
     
     private static void startDisruptor() {       
-	// ´´½¨´¦Àí²éÑ¯ÏûÏ¢µÄdisruptor
+	// åˆ›å»ºå¤„ç†æŸ¥è¯¢æ¶ˆæ¯çš„disruptor
 	_disruptor = 
-	    new Disruptor<TicketQueryEvent>
+	    new Disruptor<TicketQueryArgs>
 	    (
 	     TicketPoolService.QueryFactory,
 	     EXECUTOR,
 	     new SingleThreadedClaimStrategy(RING_SIZE),
 	     new BlockingWaitStrategy()
 	     );
-	// ×¢²áÈÕÖ¾ºÍ±¸·İÏß³Ì
-	_disruptor.handleEventsWith(_journalist);
-	_disruptor.handleEventsWith(_replicator);
 
-	// ÊÂ¼ş´¦ÀíÏß³ÌÖ»ÄÜÔÚÈÕÖ¾ºÍ±¸·İÏß³ÌÖ®ºó´¦ÀíËü
-	_ringBuffer = _disruptor.getRingBuffer();
-	SequenceBarrier barrier = _ringBuffer.newBarrier();
-	_disruptor.handleEventsWith(_eventProcessor);
+	// @brucesea
+	// å¦å¤–ç”¨Disruptorï¼Œæ¨èç”¨DisruptorWizardï¼Œ
+	// è¿™æ ·EventProcessorä¹‹é—´çš„å…³ç³»ä¼šæ¯”è¾ƒæ¸…æ™°
+	_disruptor
+	     // æ³¨å†Œæ—¥å¿—å’Œå¤‡ä»½çº¿ç¨‹
+	     .handleEventsWith(_journalist, _replicator)
+	     // äº‹ä»¶å¤„ç†çº¿ç¨‹åªèƒ½åœ¨æ—¥å¿—å’Œå¤‡ä»½çº¿ç¨‹ä¹‹åå¤„ç†å®ƒ
+	     .then(_eventProcessor);
 
-	// Æô¶¯disruptor,µÈ´ıpublishÊÂ¼ş
-	_disruptor.start();
-
-	// ´´½¨·µ»Ø²éÑ¯½á¹ûÏûÏ¢µÄdisruptor
-	_disruptorRes = 
-	    new Disruptor<TicketQueryResultEvent>
-	    (
-	     TicketPoolService.QueryResultFactory,
-	     EXECUTOR,
-	     new SingleThreadedClaimStrategy(RING_SIZE),
-	     new BlockingWaitStrategy()
-	    );
-	// ÔÚ·µ»Ø½á¹ûÏûÏ¢µÄÊ±ºò£¬¾Í²»×öÈÎºÎÈÕÖ¾ºÍ±¸·İÁË¡£
-	_outRingBuffer = _disruptorRes.start();
+	// å¯åŠ¨disruptor,ç­‰å¾…publishäº‹ä»¶
+	_ringBuffer = _disruptor.start();
     }
-
-    // µÈÖªµÀÈçºÎÕûºÏjerseyÒì²½µ÷ÓÃºó£¬É¾µôÕâ¸öº¯Êı
-    private static TicketQueryResultEvent waitForResponse(long sequence) {
-	while ( true ) {
-	    long s = _outRingBuffer.getCursor();
-	    TicketQueryResultEvent event = _outRingBuffer.get(s);
-	    if ( event.sequence == sequence ) {
-		return event;
-	    }
-	}
-    }
-
 }

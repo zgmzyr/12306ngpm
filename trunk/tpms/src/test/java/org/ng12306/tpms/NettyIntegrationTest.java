@@ -18,53 +18,43 @@ import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import org.junit.*;
 import static org.junit.Assert.*;
 import static org.ng12306.tpms.support.TestConstants.*;
+
+import org.ng12306.tpms.runtime.*;
 import org.ng12306.tpms.support.ObjectBsonEncoder;
 import org.ng12306.tpms.support.ObjectBsonDecoder;
-import org.ng12306.tpms.support.TestNettyServer;
 
 public class NettyIntegrationTest {
      class TestQueryTrainServerHandler extends SimpleChannelUpstreamHandler {
 	  @Override
 	  public void messageReceived(ChannelHandlerContext ctx,
 				      MessageEvent e) {
-	       TicketQueryEvent event = (TicketQueryEvent)e.getMessage();
-	       Train[] trains = EventBus.publishQueryEvent(
-		    event.trainId,
-		    event.startDate,
-		    event.endDate);
-	       e.getChannel().write(trains);
+	       TicketQueryArgs event = (TicketQueryArgs)e.getMessage();
+	       event.channel = e.getChannel();
+	       EventBus.publishQueryEvent(event);
 	  }
      }
 
-     // ÓÃÓÚÔÚ²âÊÔÓÃÀıÀïÏòÆ±³Ø·şÎñ·¢ËÍ³µ´Î²éÑ¯µÄNetty´¦Àíº¯Êı
+     // ç”¨äºåœ¨æµ‹è¯•ç”¨ä¾‹é‡Œå‘ç¥¨æ± æœåŠ¡å‘é€è½¦æ¬¡æŸ¥è¯¢çš„Nettyå¤„ç†å‡½æ•°
      class TestQueryTrainHandler extends SimpleChannelUpstreamHandler {
-	  // ÒªÏò·şÎñÆ÷·¢ËÍµÄ²éÑ¯Êı¾İ°ü - °üº¬³µ´ÎºÅ
-	  private final TicketQueryEvent _event;
-	  private Train[] _response;
-	  public Train[] getResponse() { return _response; }
+	  // è¦å‘æœåŠ¡å™¨å‘é€çš„æŸ¥è¯¢æ•°æ®åŒ… - åŒ…å«è½¦æ¬¡å·
+	  private final TicketQueryArgs _event;
+	  private TicketQueryResult _response;
+	  public TicketQueryResult getResponse() { return _response; }
 	 
 	  public TestQueryTrainHandler(String trainId) {
-	       _event = new TicketQueryEvent();
-	       _event.trainId = trainId;
-	       _event.startDate = new DateTime();
-	       _event.endDate = _event.startDate.plusDays(1);
-	       
-	       /* 
-	       // Ê¹ÓÃIoc»ñÈ¡Ò»¸öĞòÁĞ»¯µÄ½Ó¿Ú
-	       ISerializerFactory sf = resolve(ISerializerFactory.class);
-	       // ÒòÎªÎÒÊÇÊ¹ÓÃTDDµÄ·½Ê½±à³Ì£¬ÏÂÃæµÄjsonµÄÄ¿µÄ½ö½öÊÇÎªÁËÉè¼ÆÒ»¸öAPI¶øÒÑ
-	       // ÎÒ¾õµÃÁ÷Ë®ĞÍAPIÉè¼Æ¿ÉÄÜ»á¸üºÃÒ»Ğ©£¬ÀıÈç¶Ô±ÈÏÂÃæÁ½ĞĞ´úÂëÓëÖ®ºó×¢ÊÍµÄ´úÂë
-	       ISerializer s = sf.createFrom(event);
-	       _message.writeBytes(s.json().bson().bytes());
-	       
-	       // ISerializer s = resolve(ISerializer.class);
-	       // byte[] bytes = s.toBytes(s.ToBson(event));
-	       // _message.writeBytes(bytes);
-	       */
+	       _event = new TicketQueryArgs();
+	       _event.setAction(TicketQueryAction.Query);
+	       _event.setTrainNumber(trainId);
+	       _event.setDate(new LocalDate().plusDays(1));
+	       _event.setDepartureStation("åŒ—äº¬å—");
+	       _event.setDestinationStation("å—äº¬å—");
+	       _event.setSeatType(-1);
+	       _event.setCount(1);
 	  }
 	  
 	  @Override
@@ -76,7 +66,7 @@ public class NettyIntegrationTest {
 	  @Override
 	  public void messageReceived(ChannelHandlerContext ctx,
 				      MessageEvent e) {
-	       _response = (Train[])e.getMessage();
+	       _response = (TicketQueryResult)e.getMessage();
 	       e.getChannel().close();
 	  }
 
@@ -87,81 +77,87 @@ public class NettyIntegrationTest {
 	       e.getChannel().close();
 	  }
      }
-     
+
+     // æ ¹æ®è™«å­çš„ä»£ç ,æ‰€æœ‰çš„æœåŠ¡éƒ½éœ€è¦é¢„å…ˆæ³¨å†Œ,ç„¶åå†ä½¿ç”¨æ—¶,é€šè¿‡getRequiredService
+     // è·å–,ç±»ä¼¼Ioc,å› æ­¤æœåŠ¡å™¨åœ¨å¯åŠ¨æ—¶,éœ€è¦æ³¨å†Œè¿™äº›æœåŠ¡
+     private void registerService() throws Exception {
+	  ServiceManager
+	       .getServices()
+	       .initializeServices(new Object[] {
+			 new TestRailwayRepository(), 
+			 new TestTicketPoolManager()});
+     }
+
      @Test
-     public void ÊÔÑé¸ù¾İ³µ´Î²éÑ¯½á¹û() throws Exception {
-	  // Æô¶¯Netty·şÎñ£¬Õâ¸öº¯ÊıÓ¦¸ÃÒª·Åµ½setUpº¯ÊıÀï
-	  startServer();
+     public void ç”±è½¦æ¬¡æŸ¥è¯¢ç»“æœå®šä¹‰ç¥¨æ± æœåŠ¡å™¨API() throws Exception {
+	  // å¯åŠ¨NettyæœåŠ¡ï¼Œè¿™ä¸ªå‡½æ•°åº”è¯¥è¦æ”¾åˆ°setUpå‡½æ•°é‡Œ
+	  startRealServer();
 
 	  try {
-	       // Õâ¸ö´úÂëÊÇ´ÓNetty¹ÙÍø³­À´µÄ£¬ÔİÊ±»¹²»ÖªµÀÎªÊ²Ã´ÒªÕâÃ´×ö£¡
-	       ChannelFactory factory = new NioClientSocketChannelFactory(
-		    Executors.newCachedThreadPool(),
-		    Executors.newCachedThreadPool());
-	       ClientBootstrap bootstrap = new ClientBootstrap(factory);
 	       final TestQueryTrainHandler handler = 
 		    new TestQueryTrainHandler("G101");
 	       
-	  // ¿Í»§¶ËµÄ¹¤×÷¾ÍÊÇÏò·şÎñÆ÷·¢ËÍÒ»¸ö³µ´Î²éÑ¯BSONÇëÇó
-	       bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-			 public ChannelPipeline getPipeline() 
-			      throws Exception {
-			      // ²éÑ¯G101
-			      return Channels.pipeline(
-				   // Ê¹ÓÃ×Ô¶¨ÒåµÄbson¸ñÊ½ĞòÁĞ»¯
-				   new ObjectBsonEncoder(),
-				   new ObjectBsonDecoder(
-					ClassResolvers.cacheDisabled(
-					     getClass().getClassLoader())),
-				   handler);
-			 }
-		    });
-	       // ÏÂÃæµÄÉèÖÃÃ²ËÆÊÇTCP³¤Á¬½Ó£¬²»¹ıÎÒÃÇµÄ¼Æ»®ÊÇ½«Æä¸üĞÂ³ÉUDP
-	       // Òò´ËÒ²Ö±½Ó³­Netty¹ÙÍøµÄÊ¾Àı³ÌĞòºÃÁË£¡
-	       bootstrap.setOption("tcpNoDelay", true);
-	       bootstrap.setOption("keepAlive", true);
-	       
-	       // Á¬½Óµ½·şÎñÆ÷
-	       bootstrap.connect(new InetSocketAddress(TP_SERVER_ADDRESS,
-						       TP_SERVER_PORT));
-	       
-	       // µÈ´ıÒ»ÃëÖÓ
+	       // å®¢æˆ·ç«¯çš„å·¥ä½œå°±æ˜¯å‘æœåŠ¡å™¨å‘é€ä¸€ä¸ªè½¦æ¬¡æŸ¥è¯¢BSONè¯·æ±‚
+	       connectToServer(handler);
+	        
+	       // ç­‰å¾…ä¸€ç§’é’Ÿ
 	       Thread.sleep(1000);
 	       
-	       // ²¢ÑéÖ¤
-	       Train[] results = handler.getResponse();
-	       Train result = results[0];
-	       
-	       assertEquals("G101", result.name);
-	       assertEquals("±±¾©ÄÏ", result.departure);
-	       assertEquals("ÉÏº£ºçÇÅ", result.termination);
-	       
-	       // Ò»¸ö³µ´ÎµÄ·¢³µÊ±¼äÓ¦¸ÃÖ»ÓĞÊ±¼ä£¬Ã»ÓĞÈÕÆÚ¡£
-	       assertEquals("07:00",
-			    result.departureTime);
-	       assertEquals("12:23",
-			    result.arrivalTime);
-	       
-	       // TODO: Õâ¸ö¶ÏÑÔÊÇÓĞÎÊÌâµÄ,ÒòÎªÎÒÃ»ÓĞ³µ´ÎµÄ¾ßÌå×ùÎ»ÅäÖÃ.
-	       // µÈÒµÎñÍø¹Ø×éµÄ·şÎñ³öÀ´Ö®ºó£¬ÔÙÀ´¸üĞÂÕâ¸ö²âÊÔÓÃÀı
-	       assertEquals(2, result.availables.length);
+	       // å¹¶éªŒè¯
+	       TicketQueryResult result = handler.getResponse();
+	       assertTrue(result.getHasTicket());
 	  } finally { 
-	       stopServer();
+	       stopRealServer();
 	  }
-     }
-     
-     private TestNettyServer _server;
-     private void startServer() throws Exception {
-	  EventBus.start();
-	  _server = new TestNettyServer(TP_SERVER_PORT,
-					new TestQueryTrainServerHandler());
-	  _server.start();
      }
 
-     private void stopServer() throws Exception {
-	  if ( _server != null ) {
-	       EventBus.shutdown();
-	       _server.stop();
+     // è¿™ä¸ªå°±æ˜¯çœŸæ­£çš„ç¥¨æ± æœåŠ¡å™¨äº†ï¼Œä¸ºäº†éšè—åé¢çš„å…·ä½“å®ç°ï¼Œå®šä¹‰ä¸€ä¸ªæ¥å£ITpServer
+     private ITpServer _itpServer;
+     private void startRealServer() throws Exception {
+	  // TODO: TpServeråº”è¯¥ç”±Iocåˆ›å»ºï¼Œ
+	  // ç°åœ¨ä¸ºäº†å®šä¹‰APIå°±ç›´æ¥åˆ›å»ºæ–°å®ä¾‹äº†ã€‚
+	  _itpServer = new TpServer(TP_SERVER_PORT);
+
+	  // ç¥¨æ± æœåŠ¡å™¨åº”è¯¥å¯åŠ¨disruptor event busã€‚
+	  _itpServer.start();
+     }
+
+     private void stopRealServer() throws Exception {
+	  if ( _itpServer != null ) {
+	       _itpServer.stop();
 	  }
+     }
+
+     // æˆ‘ç‰¹çƒ¦Javaå¼ºåˆ¶åœ¨å‡½æ•°é‡Œå£°æ˜è‡ªå·±å¯èƒ½æ‰”å‡ºçš„å¼‚å¸¸ï¼Œæˆ‘çŸ¥é“Javaçš„åˆè¡·æ˜¯å¥½çš„ï¼Œä½†æ˜¯
+     // ...
+     // ...
+     // ...
+     // Javaçš„è®¾è®¡å¸ˆä»¬å°±æ²¡æœ‰é¢„è§è¿‡ä¼šæœ‰å¾ˆå¤šäººtry ... catch (Exception e)å—?
+     private void connectToServer(final ChannelHandler sendRequest) throws Exception {
+	  // è¿™ä¸ªä»£ç æ˜¯ä»Nettyå®˜ç½‘æŠ„æ¥çš„ï¼Œæš‚æ—¶è¿˜ä¸çŸ¥é“ä¸ºä»€ä¹ˆè¦è¿™ä¹ˆåšï¼
+	  ChannelFactory factory = new NioClientSocketChannelFactory(
+	       Executors.newCachedThreadPool(),
+	       Executors.newCachedThreadPool());
+	  ClientBootstrap bootstrap = new ClientBootstrap(factory);
+	  bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+		    public ChannelPipeline getPipeline() 
+			 throws Exception {
+			 return Channels.pipeline(
+			      // ä½¿ç”¨è‡ªå®šä¹‰çš„bsonæ ¼å¼åºåˆ—åŒ–
+			      new ObjectBsonEncoder(),
+			      new ObjectBsonDecoder(
+				   ClassResolvers.cacheDisabled(
+					getClass().getClassLoader())),
+			      sendRequest);
+		    }
+	       });
+	  // ä¸‹é¢çš„è®¾ç½®è²Œä¼¼æ˜¯TCPé•¿è¿æ¥ï¼Œä¸è¿‡æˆ‘ä»¬çš„è®¡åˆ’æ˜¯å°†å…¶æ›´æ–°æˆUDP
+	  // å› æ­¤ä¹Ÿç›´æ¥æŠ„Nettyå®˜ç½‘çš„ç¤ºä¾‹ç¨‹åºå¥½äº†ï¼
+	  bootstrap.setOption("tcpNoDelay", true);
+	  bootstrap.setOption("keepAlive", true);
+	  
+	  // è¿æ¥åˆ°æœåŠ¡å™¨
+	  bootstrap.connect(new InetSocketAddress(TP_SERVER_ADDRESS,
+						  TP_SERVER_PORT));	      
      }
 }

@@ -65,8 +65,8 @@ public class TestTicketPoolTest {
 		//Create query arguments. TicketQueryArgs is used for external client with human readable parameters.
 		TicketQueryArgs query = new TicketQueryArgs();
 		query.setDate(LocalDate.now());
-		query.setDepartureStation("±±¾©ÄÏ");
-		query.setDestinationStation("ÄÏ¾©ÄÏ");
+		query.setDepartureStation("åŒ—äº¬å—");
+		query.setDestinationStation("å—äº¬å—");
 		query.setTrainNumber("G101");
 		query.setSeatType(-1);
 		query.setCount(1);
@@ -95,8 +95,8 @@ public class TestTicketPoolTest {
 		
 		Assert.assertEquals(LocalDate.now(), ticket.getDepartureDate());
 		
-		Assert.assertEquals("±±¾©ÄÏ", ticket.getDepartureStation());
-		Assert.assertEquals("ÄÏ¾©ÄÏ", ticket.getDestinationStation());
+		Assert.assertEquals("åŒ—äº¬å—", ticket.getDepartureStation());
+		Assert.assertEquals("å—äº¬å—", ticket.getDestinationStation());
 		Assert.assertEquals("G101", ticket.getTrainNumber());
 		
 

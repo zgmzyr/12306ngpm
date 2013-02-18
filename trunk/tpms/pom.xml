@@ -107,12 +107,20 @@
     </build>
     <properties>
         <jersey-version>1.8</jersey-version>
-      <!--
-      使用cp936编码方式编译，以便处理中文windows和linux下的默认编码差异，感觉cp936是兼容utf-8编码的
-      这样在linux下写程序（默认是utf-8编码），和中文windows下写程序（默认是cp936编码）都能正常编译
-      -->
-        <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
-        <project.build.sourceEncoding>cp936</project.build.sourceEncoding>
+	<!--
+	    @在这里(634318705) 
+	    上传时最好把文件存为utf8格式，否则注释看不了，理解的比较慢
+	-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<!--
+	    使用cp936编码方式编译，以便处理中文windows和linux下的默认编码差异，
+	    感觉cp936是兼容utf-8编码的
+	    这样在linux下写程序（默认是utf-8编码），和中文windows下写程序
+	    （默认是cp936编码）都能正常编译
+	-->
+        <!-- 
+	     <project.build.sourceEncoding>cp936</project.build.sourceEncoding>
+	-->
     </properties>
     <repositories>
         <repository>

@@ -16,7 +16,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 package org.diting.collections;
 
 import java.util.Comparator;
-import java.util.Objects;
 
 
 /**
@@ -44,28 +43,9 @@ public class NaturalComparator<T> implements Comparator<T> {
 		{
 			return 1;
 		}
-		else if(arg0 instanceof Comparable)
-		{
-			return ((Comparable)arg0).compareTo(arg1);
-		}
-		else if(Objects.equals(arg0, arg1))
-		{
-			return 0;
-		}
 		else
 		{
-			Integer h1 = arg0.hashCode();
-			Integer h2 = arg1.hashCode();
-			int rs = h1.compareTo(h2);
-			
-			if(rs == 0)
-			{
-				System.out.print("******************Wierd*********************");
-				
-			}
-			
-			return rs;
-			
+		    return ((Comparable)arg0).compareTo(arg1);
 		}
 		
 	
