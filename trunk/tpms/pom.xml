@@ -7,44 +7,38 @@
     <version>0.1</version>
     <name>org.ng12306.tpms</name>  
     <dependencies>
+        <!--
          <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-grizzly</artifactId>
             <version>1.8</version>
         </dependency>            
-        <!-- uncomment this to get JSON support:
-        -->
          <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
             <version>1.8</version>
         </dependency>
-        <!-- uncomment this to get Fastinfoset support:
          <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-fastinfoset</artifactId>
             <version>1.8</version>
         </dependency>
-        -->
-        <!-- uncomment this to get ATOM support:
          <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-atom</artifactId>
             <version>1.8</version>
         </dependency>
-        -->
-        <!-- uncomment this to get multipart MIME types support:
          <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-multipart</artifactId>
             <version>1.8</version>
         </dependency>
-        -->
            <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-servlet-webserver</artifactId>
             <version>1.9.31</version>
         </dependency>
+	-->
 	<!-- 
 	     add disruptor support: http://lmax-exchange.github.com/disruptor/
 	-->
@@ -59,12 +53,14 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
+	<!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
             <version>1.8</version>
             <scope>test</scope>
         </dependency>
+	-->
         <dependency>
           <groupId>joda-time</groupId>
           <artifactId>joda-time</artifactId>

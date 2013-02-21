@@ -1,3 +1,4 @@
+# -*- coding: undecided -*-
 #
 # Author:: Seth Chisamore (<schisamo@opscode.com>)
 # Cookbook Name:: java
@@ -28,4 +29,5 @@ include_recipe "java::#{node['java']['install_flavor']}"
   end
 end
 
-package "ant"
+# 本来ant是为了编译disruptor用的，现在没有必要了！
+# package "ant"
