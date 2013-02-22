@@ -22,7 +22,8 @@ https://github.com/12306NgPM/12306ngpm/wiki/%E6%96%B0%E4%BA%BA%E4%B8%8A%E6%89%8B
 5. 如果是windows平台，用putty登录：127.0.0.1:2222，用户名/密码：vagrant/vagrant
 6. 如果是非Windows平台
    
-   vagrant ssh
+   vagrant ssh server
+   vagrant ssh client
    
 7. 进入工作主目录 - 这个虚拟机上的主目录是你宿主机执行vagrant命令的目录
    
